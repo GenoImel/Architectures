@@ -1,19 +1,16 @@
-using System;
 using RootName.Core.BaseMessages;
 
 namespace RootName.Core.BaseStates
 {
-    internal class StateChangedMessage<TState, TFiniteState> : IMessage
-        where TState : IState
-        where TFiniteState : IFiniteState
+    /// <summary>
+    /// Base Message Event for State Changes.
+    /// Enforces specific state change pattern across the application.
+    /// </summary>
+    internal class StateChangedMessage<TFiniteState> : IMessage where TFiniteState : IFiniteState
     {
-        public TFiniteState PrevState { get; }
-        public TFiniteState NextState { get; }
-
-        public StateChangedMessage(TFiniteState prevState, TFiniteState nextState)
-        {
-            PrevState = prevState;
-            NextState = nextState;
-        }
+        public TFiniteState PrevState { get; protected set; }
+        public TFiniteState NextState { get; protected set; }
+        
+        public StateChangedMessage() { }
     }
 }

@@ -2,11 +2,12 @@ using RootName.Core.BaseStates;
 
 namespace RootName.Runtime.States.ApplicationStates
 {
-    internal class ApplicationStateChangedMessage : StateChangedMessage<ApplicationState, ApplicationFiniteState>
+    internal class ApplicationStateChangedMessage : StateChangedMessage<ApplicationFiniteState>
     {
         public ApplicationStateChangedMessage(ApplicationFiniteState prevState, ApplicationFiniteState nextState)
-            : base(prevState, nextState)
         {
+            PrevState = prevState;
+            NextState = nextState;
         }
     }
 }

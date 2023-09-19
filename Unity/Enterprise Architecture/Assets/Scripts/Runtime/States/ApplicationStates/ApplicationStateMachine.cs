@@ -5,6 +5,11 @@ namespace RootName.Runtime.States.ApplicationStates
 {
     internal sealed class ApplicationStateMachine : BaseStateMachine, IApplicationStateMachine
     {
+        private void Awake()
+        {
+            SetInitialState();
+        }
+        
         public void SetLoginState()
         {
             SetState(new ApplicationFiniteState.LoginState());
