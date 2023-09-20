@@ -1,8 +1,8 @@
 using System;
-using RootName.Core.BaseMessages;
-using RootName.Core.BaseStates;
-using RootName.Core.BaseServices;
-using RootName.Core.BaseEntityServices;
+using RootName.Core.EntityServices;
+using RootName.Core.Messages;
+using RootName.Core.Services;
+using RootName.Core.States;
 using UnityEngine;
 
 namespace RootName.Core

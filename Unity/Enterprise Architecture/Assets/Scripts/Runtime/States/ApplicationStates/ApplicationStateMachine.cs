@@ -1,5 +1,5 @@
-using RootName.Core.BaseMessages;
-using RootName.Core.BaseStates;
+using RootName.Core.Messages;
+using RootName.Core.States;
 
 namespace RootName.Runtime.States.ApplicationStates
 {

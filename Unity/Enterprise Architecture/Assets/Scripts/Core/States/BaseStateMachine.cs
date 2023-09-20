@@ -1,8 +1,8 @@
 using System;
-using RootName.Core.BaseMessages;
+using RootName.Core.Messages;
 using UnityEngine;
 
-namespace RootName.Core.BaseStates
+namespace RootName.Core.States
 {
     internal abstract class BaseStateMachine : MonoBehaviour, IStateMachine
     {
