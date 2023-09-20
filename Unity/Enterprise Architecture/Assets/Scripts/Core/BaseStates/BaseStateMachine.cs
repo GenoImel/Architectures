@@ -1,3 +1,4 @@
+using System;
 using RootName.Core.BaseMessages;
 using UnityEngine;
 
@@ -17,8 +18,7 @@ namespace RootName.Core.BaseStates
         {
             if (nextState == null)
             {
-                Debug.LogError("Next state is null.");
-                return;
+                throw new Exception("Next state is null.");
             }
 
             if (currentState == nextState)
@@ -29,8 +29,7 @@ namespace RootName.Core.BaseStates
             
             if (currentState != null && currentState.GetStateType() != nextState.GetStateType())
             {
-                Debug.LogError($"Invalid state transition from \"{currentState}\" to \"{nextState}\".");
-                return;
+                throw new Exception($"Invalid state transition from \"{currentState}\" to \"{nextState}\".");
             }
 
             prevState = currentState;
