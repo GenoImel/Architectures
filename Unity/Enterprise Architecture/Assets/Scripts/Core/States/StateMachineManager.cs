@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RootName.Core.BaseStates
+namespace RootName.Core.States
 {
     internal sealed class StateMachineManager
     {

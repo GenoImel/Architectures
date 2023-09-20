@@ -1,6 +1,6 @@
 using System;
 
-namespace RootName.Core.BaseStates
+namespace RootName.Core.States
 {
     /// <summary>
     /// Allows us to define specific finite states within an <see cref="IState"/>.

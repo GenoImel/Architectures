@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RootName.Core.BaseServices
+namespace RootName.Core.Services
 {
     internal sealed class ServiceManager
     {

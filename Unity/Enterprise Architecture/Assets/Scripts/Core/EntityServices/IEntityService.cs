@@ -1,4 +1,4 @@
-namespace RootName.Core.BaseEntityServices
+namespace RootName.Core.EntityServices
 {
     internal interface IEntityService
     {

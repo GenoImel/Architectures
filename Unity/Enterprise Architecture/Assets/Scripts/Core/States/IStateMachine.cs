@@ -1,4 +1,4 @@
-namespace RootName.Core.BaseStates
+namespace RootName.Core.States
 {
     /// <summary>
     /// For generic typing of specific state machines.

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RootName.Core.BaseEntityServices
+namespace RootName.Core.EntityServices
 {
     internal sealed class EntityServiceManager
     {

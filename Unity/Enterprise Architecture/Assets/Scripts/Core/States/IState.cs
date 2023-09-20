@@ -1,6 +1,4 @@
-using System;
-
-namespace RootName.Core.BaseStates
+namespace RootName.Core.States
 {
     /// <summary>
     /// For generic typing of specific state types on a per-State Machine basis.
@@ -8,6 +6,5 @@ namespace RootName.Core.BaseStates
     /// </summary>
     internal interface IState
     {
-        Type GetFiniteStateType();
     }
 }

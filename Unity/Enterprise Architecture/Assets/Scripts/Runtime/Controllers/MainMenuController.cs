@@ -1,4 +1,3 @@
-using System;
 using RootName.Core;
 using RootName.Runtime.States.ApplicationStates;
 using UnityEngine;

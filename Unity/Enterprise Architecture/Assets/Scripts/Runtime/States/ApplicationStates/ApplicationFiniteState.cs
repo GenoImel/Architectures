@@ -1,5 +1,5 @@
 using System;
-using RootName.Core.BaseStates;
+using RootName.Core.States;
 
 namespace RootName.Runtime.States.ApplicationStates
 {

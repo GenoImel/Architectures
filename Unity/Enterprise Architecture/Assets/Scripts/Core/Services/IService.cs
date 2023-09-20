@@ -1,4 +1,4 @@
-namespace RootName.Core.BaseServices
+namespace RootName.Core.Services
 {
     internal interface IService
     {

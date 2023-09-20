@@ -1,4 +1,4 @@
-namespace RootName.Core.BaseMessages
+namespace RootName.Core.Messages
 {
     internal interface IMessage
     {
