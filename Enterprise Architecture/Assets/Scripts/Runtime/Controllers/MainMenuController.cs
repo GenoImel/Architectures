@@ -10,7 +10,7 @@ namespace RootName.Runtime.Controllers
         [Header("Buttons")]
         [SerializeField] private Button loginButton;
         [SerializeField] private Button logoutButton;
-        
+
         private IApplicationStateMachine applicationStateMachine;
 
         private void Awake()

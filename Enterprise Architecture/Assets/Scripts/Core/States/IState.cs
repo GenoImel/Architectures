@@ -1,3 +1,5 @@
+using System;
+
 namespace RootName.Core.States
 {
     /// <summary>
@@ -6,5 +8,6 @@ namespace RootName.Core.States
     /// </summary>
     internal interface IState
     {
+        Type GetFiniteStateType();
     }
 }
