@@ -57,7 +57,7 @@ Assets/Textures
 
 ## General
 
-A general script is one that is used for controllers and other dynamic, feature restricted scripts. These can either be preloaded by the `ApplicationManager` in cases where they are needed across different scenes, or they may be placed into a specific scene if their functionality is limited in architectural scope. The general format for a `MonoBehaviour` controller, manager, or other dynamic script is as follows:
+A general script is one that is used for controllers and other dynamic, feature restricted scripts. These can either be preloaded by the `ApplicationManager` in cases where they are needed across different scenes, or they may be placed into a specific scene if their functionality is limited in architectural scope. The general format for a `MonoBehaviour` controller or other dynamic script is as follows:
 
 ```csharp
 // We should try to keep our namespaces organized for readability and maintainability.
@@ -79,7 +79,7 @@ namespace RootName.Runtime.Example
     // Most classes are marked as internal to restrict visibility to this namespace only.
     // Other classes outside of the namespace will need to import the namespace with a using statement.
     // Unless inheritance is required, we mark classes as sealed to end the line of inheritance.
-    internal sealed class ExampleMonoBehaviour : MonoBehaviour
+    internal sealed class ExampleMonoBehavior : MonoBehaviour
     {
         // Editor fields are the front-end of MonoBehaviour scripts, and are defined first.
         // Fields should be grouped using Header attributes to ease readability in both the script and editor
@@ -243,7 +243,7 @@ namespace RootName.Runtime.Example
             inputButton.action.performed += OnInputButtonPressed;
             inputButton.action.Enable();
             
-            // We can also leverage the core application architecture to listen for messages sent via message bus.
+            // We can also leverage the core application architecture to listen for Message Events sent via message bus.
             // These listeners are added last.
             //
             // Make sure to include a private response method for the message.
@@ -266,7 +266,7 @@ namespace RootName.Runtime.Example
 
 ## Services
 
-`Services` are used to share data and code amongst `MonoBehaviour` controllers, managers, and other dynamic scripts without the need for tight coupling across the scene. All `Services` are bootstrapped into the core architecture at runtime by the `RootNameApplicationManager` prefab. For information on how to add a `Service` to the bootstrapping routine, please see the `CoreArchitecture.md` document.
+`Services` are used to share data and code across `MonoBehaviour` controllers and other dynamic scripts without the need for tight coupling across the scene. All `Services` are bootstrapped into the core architecture at runtime by the `RootNameApplicationManager` prefab. For information on how to add a `Service` to the bootstrapping routine, please see the `CoreArchitecture.md` document.
 
 When creating a new `Service`, we must first define an interface for the `Service` as shown below:
 
@@ -297,7 +297,7 @@ namespace RootName.Runtime.Services.ExampleService
 }
 ```
 
-After defining the interface for the `Service`, we create a `MonoBehavior` companion class in another script. This script will be added as a component of a `GameObject` by the same name of the Service:
+After defining the interface for the `Service`, we create a `MonoBehaviour` companion class in another script. This script will be added as a component of a `GameObject` by the same name of the Service:
 
 ```csharp
 using UnityEngine;
@@ -322,14 +322,14 @@ namespace RootName.Runtime.Services.ExampleService
     // In general when writing the class definition for a Service:
     // - Mark the class as internal to restrict its visibility to the namespace it lives in.
     // - Make the class sealed to prevent further inheritance.
-    // - Inherit from MonoBehavior so that we can add the Service to a GameObject as a component.
+    // - Inherit from MonoBehaviour so that we can add the Service to a GameObject as a component.
     // - Inherit from IService for generic typing during the ApplicationManager bootstrapping routine.
     // - Inherit from the companion interface, in this case IExampleService.
     internal sealed class ExampleService : MonoBehaviour, IService, IExampleService
     {
         // When defining fields for Services, we follow the same general rules.
         // In general, however, Services should only contain regular private fields
-        // and public properties for accessing those fields. See the example MonoBehavior
+        // and public properties for accessing those fields. See the example MonoBehaviour
         // script for coding standards concerning fields.
         //
         // Services should not contain Unity/C# actions, events, or delegates as these require
