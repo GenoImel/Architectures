@@ -13,7 +13,7 @@ namespace RootName.Core.EntityServices
         {
             if (entityService == null)
             {
-                throw new Exception($"{nameof(entityService)} cannot be null");
+                throw new NullReferenceException($"{nameof(entityService)} cannot be null");
             }
             
             var entityServiceType = typeof(TBindTo);

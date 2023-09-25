@@ -2,11 +2,11 @@
 
 In general, the coding style should follow the C# Coding Conventions as defined by [Microsoft](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions). These coding standards should make our lives easier by ensuring the overall readability and maintainability of the code. Note that we also follow the SOLID programming principles and try to adhere to the Gang of Four design patterns whenever possible to enable flexibility and scalability of the codebase as it grows.
 
-This document provides a quick-start guide for working within the standards and the core architecture for the game. Templates with heavy commentary are provided to empower developers to begin working with the codebase with short suspense. The Coding Standards document does not, however, describe the game on a deep architectural level. For more information concerning the architectural structure of the codebase, please see `CoreArchitecture.md`.
+This document provides a quick-start guide for working within the standards and the core architecture for the application. Templates with heavy commentary are provided to empower developers to begin working with the codebase with short suspense. The Coding Standards document does not, however, describe the application on a deep architectural level. For more information concerning the architectural structure of the codebase, please see `CoreArchitecture.md`.
 
 ## File Structure
 
-Recommendations for the file/folder structure of a Unity project is documented below. Through the development cycle of the game, we may have small deviations from the structure that is outlined. If the need arises, this section will be updated to reflect any changes.
+Recommendations for the file/folder structure of a Unity project is documented below. Through the development cycle of the application, we may have small deviations from the structure that is outlined. If the need arises, this section will be updated to reflect any changes.
 
 ```
 // All core architectural scripts are placed here
@@ -22,14 +22,14 @@ Assets/Scripts/Editor
 Assets/Scripts/Tests/Editor
 Assets/Scripts/Tests/Runtime
 
-//All game config settings go here, organized by subfolder
+//All application config settings go here, organized by subfolder
 Assets/Settings
 
 //Rendering settings go here, specifically
 Assets/Settings/Rendering
 
 // Resources folder holds all application prefabs
-// GameManager.prefab resides at the root Prefabs folder
+// ApplicationManager.prefab resides at the root Prefabs folder
 // All other prefabs should be kept in appropriately named subfolders
 Assets/Resources/Prefabs
 
@@ -45,7 +45,7 @@ Assets/Animations
 // Materials and font asset materials organized into subfolders
 Assets/Materials
 
-// All scenes for the game organized into subfolders
+// All scenes for the application organized into subfolders
 Assets/Scenes
 
 // Custom shader code and shader graphs organized into subfolders
@@ -57,7 +57,7 @@ Assets/Textures
 
 ## General
 
-A general script is one that is used for controllers, managers, and other dynamic scripts that do not provide a MonoSystem. These can either be preloaded by the `GameManager` in cases where they are needed across different scenes, or they may be placed into a specific scene if their functionality is limited in architectural scope. The general format for a `MonoBehaviour` controller, manager, or other dynamic script is as follows:
+A general script is one that is used for controllers and other dynamic, feature restricted scripts. These can either be preloaded by the `ApplicationManager` in cases where they are needed across different scenes, or they may be placed into a specific scene if their functionality is limited in architectural scope. The general format for a `MonoBehaviour` controller, manager, or other dynamic script is as follows:
 
 ```csharp
 // We should try to keep our namespaces organized for readability and maintainability.
@@ -69,7 +69,7 @@ using System.Linq;
 using UnityEngine; // References to Unity internal namespaces are added next.
 using UnityEngine.UI; 
 using UnityEngine.InputSystem;
-using RootName.Core; // References to namespaces internal to the game are added last.
+using RootName.Core; // References to namespaces internal to the application are added last.
 
 // All scripts must have a namespace:
 // - Namespaces should have RootName as the root
@@ -135,11 +135,11 @@ namespace RootName.Runtime.Example
         // restricted to MonoBehaviour classes that reside on the same prefab GameObject.
         public event Action OnPointAdded;
         
-        // References to MonoSystems are private and placed at the end.
-        private IExampleMonoSystem exampleMonoSystem;
+        // References to Services are private and placed at the end.
+        private IExampleService exampleService;
         
         // Unity MonoBehaviour lifecycle methods are placed after all fields, properties, actions,
-        // and dependencies on MonoSystems. The order of the LifeCycle methods should mirror the order
+        // and dependencies on Services. The order of the LifeCycle methods should mirror the order
         // documented in Unity's execution order documentation.
         //
         // These methods must always be private. If inheritance was used, then they should be
@@ -149,8 +149,8 @@ namespace RootName.Runtime.Example
             // Awake is executed once, before the GameObject is enabled and prior to the first frame.
             // - Used to initialize variables only.
             // - No computations should be done here.
-            // - Also used for dependency injection of MonoSystems.
-            exampleMonoSystem = GameManager.GetMonoSystem<IExampleMonoSystem>();
+            // - Also used for dependency injection of Services.
+            exampleService = ApplicationManager.GetService<IExampleService>();
         }
         
         // OnEnable and OnDisable methods are used for event subscription. When adding listeners in OnEnable(),
@@ -247,7 +247,7 @@ namespace RootName.Runtime.Example
             // These listeners are added last.
             //
             // Make sure to include a private response method for the message.
-            GameManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
+            ApplicationManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
         }
 
         private void RemoveListeners()
@@ -258,36 +258,36 @@ namespace RootName.Runtime.Example
             inputButton.action.performed -= OnInputButtonPressed;
             inputButton.action.Disable();
             
-            GameManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
+            ApplicationManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
         }
     }
 }
 ```
 
-## MonoSystems
+## Services
 
-`MonoSystems` are used to share data and code amongst `MonoBehaviour` controllers, managers, and other dynamic scripts without the need for tight coupling across the scene. All `MonoSystems` are bootstrapped into the core architecture at runtime by the `RootNameGameManager` prefab. For information on how to add a `MonoSystem` to the bootstrapping routine, please see the `CoreArchitecture.md` document.
+`Services` are used to share data and code amongst `MonoBehaviour` controllers, managers, and other dynamic scripts without the need for tight coupling across the scene. All `Services` are bootstrapped into the core architecture at runtime by the `RootNameApplicationManager` prefab. For information on how to add a `Service` to the bootstrapping routine, please see the `CoreArchitecture.md` document.
 
-When creating a new `MonoSystem`, we must first define an interface for the `MonoSystem` as shown below:
+When creating a new `Service`, we must first define an interface for the `Service` as shown below:
 
 ```csharp
-// All MonoSystems require an interface to be defined.
+// All Services require an interface to be defined.
 //
-// The interface of the MonoSystem resides in a subfolder of the same name within
-// the the "Assets/Runtime/MonoSystems" folder.
+// The interface of the Service resides in a subfolder of the same name within
+// the the "Assets/Runtime/Services" folder.
 //
-// Defining an interface for our MonoSystem allows for MonoSystems to be generically typed,
-// which enables the bootstrapping of MonoSystems at runtime. Interfaces also allow us
-// to restrict how these MonoSystems are used by other classes.
+// Defining an interface for our Service allows for Services to be generically typed,
+// which enables the bootstrapping of Services at runtime. Interfaces also allow us
+// to restrict how these Services are used by other classes.
 //
-// All public methods for the MonoSystem must have their method signatures
+// All public methods for the Service must have their method signatures
 // defined in the interface itself.
-namespace RootName.Runtime.MonoSystems.ExampleMonoSystem
+namespace RootName.Runtime.Services.ExampleService
 {
     /// <summary>
     /// We should always add summaries to interface class definitions.
     /// </summary>
-    internal interface IExampleMonoSystem
+    internal interface IExampleService
     {
         /// <summary>
         /// We should also always add summaries to interface methods.
@@ -297,59 +297,59 @@ namespace RootName.Runtime.MonoSystems.ExampleMonoSystem
 }
 ```
 
-After defining the interface for the `MonoSystem`, we create a `MonoBehavior` companion class in another script. This script will be added as a component of a `GameObject` by the same name of the MonoSystem:
+After defining the interface for the `Service`, we create a `MonoBehavior` companion class in another script. This script will be added as a component of a `GameObject` by the same name of the Service:
 
 ```csharp
 using UnityEngine;
-using RootName.Core; // Required for inheriting from IMonoSystem.
+using RootName.Core; // Required for inheriting from IService.
 using RootName.Runtime.Example;
 
-// The namespace of the MonoSystem should always match it's file/folder location.
-namespace RootName.Runtime.MonoSystems.ExampleMonoSystem
+// The namespace of the Service should always match it's file/folder location.
+namespace RootName.Runtime.Services.ExampleService
 {
-    // MonoSystems allow us to share code and data across MonoBehaviour controllers, managers,
-    // and other dynamic scripts without tight coupling. By using the GameManager singleton,
-    // we can perform dependency injection to get access to MonoSystems using GameManager.GetMonoSystem().
+    // Services allow us to share code and data across MonoBehaviour controllers, managers,
+    // and other dynamic scripts without tight coupling. By using the ApplicationManager singleton,
+    // we can perform dependency injection to get access to Services using ApplicationManager.GetService().
     //
-    // MonoSystems are a key part of our application for the following reasons:
-    // - MonoSystems minimize the number of singletons in a game's architecture.
+    // Services are a key part of our application for the following reasons:
+    // - Services minimize the number of singletons in a application's architecture.
     // - They enable code and data sharing.
     // - Dependency injection minimizes tight-coupling across classes and GameObjects.
     //
     // Also note that when inheriting interfaces, we don't need to specify summaries. These summaries
     // are already inherited from the interface.
     
-    // In general when writing the class definition for a MonoSystem:
+    // In general when writing the class definition for a Service:
     // - Mark the class as internal to restrict its visibility to the namespace it lives in.
     // - Make the class sealed to prevent further inheritance.
-    // - Inherit from MonoBehavior so that we can add the MonoSystem to a GameObject as a component.
-    // - Inherit from IMonoSystem for generic typing during the GameManager bootstrapping routine.
-    // - Inherit from the companion interface, in this case IExampleMonoSystem.
-    internal sealed class ExampleMonoSystem : MonoBehaviour, IMonoSystem, IExampleMonoSystem
+    // - Inherit from MonoBehavior so that we can add the Service to a GameObject as a component.
+    // - Inherit from IService for generic typing during the ApplicationManager bootstrapping routine.
+    // - Inherit from the companion interface, in this case IExampleService.
+    internal sealed class ExampleService : MonoBehaviour, IService, IExampleService
     {
-        // When defining fields for MonoSystems, we follow the same general rules.
-        // In general, however, MonoSystems should only contain regular private fields
+        // When defining fields for Services, we follow the same general rules.
+        // In general, however, Services should only contain regular private fields
         // and public properties for accessing those fields. See the example MonoBehavior
         // script for coding standards concerning fields.
         //
-        // MonoSystems should not contain Unity/C# actions, events, or delegates as these require
+        // Services should not contain Unity/C# actions, events, or delegates as these require
         // tight coupling. Use messages to broadcast events.
 
-        private IOtherExampleMonoSystem otherExampleMonoSystem;
+        private IOtherExampleService otherExampleService;
 
-        // We can conveniently use Unity's lifecycle methods within our MonoSystems, since we
+        // We can conveniently use Unity's lifecycle methods within our Services, since we
         // inherit from MonoBehaviour.
         private void Awake()
         {
             // We can also initialize dependencies.
-            // This includes dependencies on other MonoSystems!
-            otherExampleMonoSystem = GameManager.GetMonoSystem<IOtherExampleMonoSystem>();
+            // This includes dependencies on other Services!
+            otherExampleService = ApplicationManager.GetService<IOtherExampleService>();
         }
 
         private void OnEnable()
         {
-            // We can Add listeners for messages in our MonoSystems as well.
-            GameManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
+            // We can Add listeners for messages in our Services as well.
+            ApplicationManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
         }
 
         private void OnDisable()
@@ -359,23 +359,23 @@ namespace RootName.Runtime.MonoSystems.ExampleMonoSystem
             //
             // Also, if find yourself adding and removing many listeners, wrap these in
             // methods called AddListeners() and RemoveListeners() to keep the script organized.
-            GameManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
+            ApplicationManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
         }
 
-        // Summary is inherited from IExampleMonoSystem.
+        // Summary is inherited from IExampleService.
         public void DoThings()
         {
             DoPrivateThings();
         }
         
-        // Private methods are used for logic internal to the MonoSystem, and defined after public methods.
+        // Private methods are used for logic internal to the Service, and defined after public methods.
         // Private methods should not be defined in the interface.
         private void DoPrivateThings()
         {
             // Do some calculations or some other private thing.
-            // Note that you can publish messages over the message bus in a MonoSystem.
+            // Note that you can publish messages over the message bus in a Service.
             var isEnabled = false;
-            GameManager.Publish(new OtherExampleMessage(isEnabled));
+            ApplicationManager.Publish(new OtherExampleMessage(isEnabled));
         }
     }
 ```
@@ -393,10 +393,11 @@ When defining messages in the application, we create a `Messages` script that li
 // so that they can be added to the MessageManager in the core architecture.
 using RootName.Core;
 
-// Messages must live in a namespace that corresponds to their file/folder location.
+// Messages scripts containing individual Message Events must live in a namespace that corresponds to their file/folder location.
+// These file/folder locations correspond to the feature most related to the Message Events.
 namespace RootName.Runtime.Example
 {
-    // Message bus events should be defined in separate files, and should be kept close to
+    // Message Events should be defined in separate files, and should be kept close to
     // their respective scripts.
     
     // Some quick notes on writing Message Events:

@@ -13,11 +13,11 @@ namespace RootName.Core.States
         {
             if (stateMachine == null)
             {
-                throw new Exception($"{nameof(stateMachine)} cannot be null");
+                throw new NullReferenceException($"{nameof(stateMachine)} cannot be null");
             }
 
             var stateType = typeof(TBindTo);
-            this.stateMachines[stateType] = stateMachine;
+            stateMachines[stateType] = stateMachine;
         }
 
         public TState GetStateMachine<TState>()
