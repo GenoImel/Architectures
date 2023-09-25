@@ -271,6 +271,8 @@ namespace RootName.Runtime.Example
 When creating a new `Service`, we must first define an interface for the `Service` as shown below:
 
 ```csharp
+using RootName.Core.Services; // Required for inheriting from IService.
+
 // All Services require an interface to be defined.
 //
 // The interface of the Service resides in a subfolder of the same name within
@@ -287,7 +289,7 @@ namespace RootName.Runtime.Services.ExampleService
     /// <summary>
     /// We should always add summaries to interface class definitions.
     /// </summary>
-    internal interface IExampleService
+    internal interface IExampleService : IService
     {
         /// <summary>
         /// We should also always add summaries to interface methods.
@@ -301,7 +303,6 @@ After defining the interface for the `Service`, we create a `MonoBehaviour` comp
 
 ```csharp
 using UnityEngine;
-using RootName.Core; // Required for inheriting from IService.
 using RootName.Runtime.Example;
 
 // The namespace of the Service should always match it's file/folder location.
@@ -325,7 +326,7 @@ namespace RootName.Runtime.Services.ExampleService
     // - Inherit from MonoBehaviour so that we can add the Service to a GameObject as a component.
     // - Inherit from IService for generic typing during the ApplicationManager bootstrapping routine.
     // - Inherit from the companion interface, in this case IExampleService.
-    internal sealed class ExampleService : MonoBehaviour, IService, IExampleService
+    internal sealed class ExampleService : MonoBehaviour, IExampleService
     {
         // When defining fields for Services, we follow the same general rules.
         // In general, however, Services should only contain regular private fields
@@ -384,7 +385,7 @@ namespace RootName.Runtime.Services.ExampleService
 
 In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with entities, components, and systems within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS architecture tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, whil still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
 
-In the future, we will likely create a `internal sealed class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Stay tuned.
+In the future, we will likely create a `internal abstract class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Once that happens, this section will be updated to reflect these changes and provide specific coding standards for `EntityServices` that takes into account the differences between these and regular `Services`.
 
 ## States
 
