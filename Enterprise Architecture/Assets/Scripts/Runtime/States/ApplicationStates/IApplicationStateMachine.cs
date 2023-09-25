@@ -1,6 +1,8 @@
+using RootName.Core.States;
+
 namespace RootName.Runtime.States.ApplicationStates
 {
-    internal interface IApplicationStateMachine
+    internal interface IApplicationStateMachine : IStateMachine
     {
         /// <summary>
         /// Sets the login state.

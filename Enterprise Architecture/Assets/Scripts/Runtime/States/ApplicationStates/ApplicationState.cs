@@ -1,5 +1,4 @@
 using System;
-using RootName.Core;
 using RootName.Core.States;
 
 namespace RootName.Runtime.States.ApplicationStates

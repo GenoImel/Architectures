@@ -380,6 +380,239 @@ namespace RootName.Runtime.Services.ExampleService
     }
 ```
 
+## EntityServices
+
+In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with entities, components, and systems within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS architecture tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, whil still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
+
+In the future, we will likely create a `internal sealed class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Stay tuned.
+
+## States
+
+Provided with the application architecture are core scripts for creating `States`, or hierarchical state machines (HSMs). These state machines require the implementation of specific pieces of the core architecture in order to enforce adherence to a specific state change pattern, ensuring that `State Change Events` always happen in a specific order in every single HSM. Let's step through an `ExampleStateMachine` to better illustrate this, lets start by defining an overall `IState` definition specific to our `ExampleStateMachine`:
+
+```csharp
+// - System is needed to returning the typeof FiniteStates within our State definition.
+//
+// - RootName.Core.States is required for inheriting from the IState interface.
+//   This allows us to generically type our different States, enforcing type-safety
+//   and allowing us to define State definitions with FiniteStates without enums.
+using System; 
+using RootName.Core.States; 
+
+// The namespace of the any scripts for a StateMachine should always match its file/folder location.
+namespace RootName.Runtime.States.ExampleStates
+{
+    // All State definitions must inherit from the IState interface for type-safety.
+    // This prevents us from mixing up different States from other StateMachines.
+    internal class ExampleState : IState
+    {
+        // We must provide a method for returning the type of FiniteState that this State uses.
+        // This concludes the enforcement of type-safety for our StateMachine
+        // within our enumless state definition.
+        public Type GetFiniteStateType()
+        {
+            return typeof(ExampleFiniteState);
+        }
+    }
+}
+```
+
+Now that we have a parent type defined for our `IFiniteStates`, lets go on to define some enumless states for our `ExampleStateMachine`. To do this, create a separate script called `ExampleFiniteStates`:
+
+```csharp
+// - System is needed to returning the typeof State for an individual FiniteState.
+//
+// - RootName.Core.States is required for inheriting from the IFiniteState interface.
+//   This allows us to generically type our different IFiniteStates, enforcing type-safety
+//   and allowing us to define IFiniteState definitions without enums.
+using System;
+using RootName.Core.States;
+
+// The namespace of the any scripts for a StateMachine should always match its file/folder location.
+namespace RootName.Runtime.States.ExampleStates
+{
+    // All State definitions must inherit from the IState interface for type-safety.
+    // This prevents us from mixing up different States from other StateMachines.
+    internal abstract class ExampleFiniteState : IFiniteState
+    {
+
+        // We must provide a method for returning the type of State that this FiniteState belongs to.
+        // This concludes the enforcement of type-safety for our StateMachine
+        // within our enumless state definition.
+        public Type GetStateType()
+        {
+            return typeof(ExampleState);
+        }
+        
+        // Now we can define some FiniteStates for our StateMachine!
+        // To do this we create some empty classes that inherit from our abstract FiniteState class.
+        // Sealing these classes prevents them from being inherited from, ending the inheritance chain.
+        internal sealed class RedState : ExampleFiniteState
+        {
+        }
+        
+        internal sealed class BlueState : ExampleFiniteState
+        {
+        }
+        
+        internal sealed class GreenState : ExampleFiniteState
+        {
+        }
+    }
+}
+```
+
+Now we need to a create a `StateChangedMessage` that is specific to our `StateMachine`'s `IState` and `IFiniteState` types for overall type-safety. This will allow us to communicate the `State Changed Message Event` without the risk of mixing types between different `StateMachines`:
+
+```csharp
+// We need to use the RootName.Core.States namespace to inherit from the StateChangedMessage<T> class.
+using RootName.Core.States;
+
+// The namespace of the any scripts for a StateMachine should always match its file/folder location.
+// 
+// For our Message Events specifically, all Message Events must be placed in a script called Messages
+// that resides within the namespace where these Message Events are most relevant.
+namespace RootName.Runtime.States.ExampleStates
+{
+    // To create an ExampleStateChangedMessage, we must inherit from the StateChangedMessage<T> class,
+    // and provide the type of FiniteState that we are using.
+    //
+    // This Message, like all other Message Events in our application, should be sealed to end
+    // the inheritance chain.
+    internal sealed class ExampleStateChangedMessage : StateChangedMessage<ExampleFiniteState>
+    {
+        // As with all non-empty Message Events, we must provide a public constructor. For our StateChangedMessage<T>
+        // events specifically, we will want to provide parameters of the previous and next FiniteStates, and
+        // pass them to the base constructor.
+        //
+        // It is very important to provide the previous and next states in this specific order as method parameters.
+        // Mixing them up may cause unintended behaviour.
+        public ExampleStateChangedMessage(ExampleFiniteState prevState, ExampleFiniteState nextState)
+        {
+            PrevState = prevState;
+            NextState = nextState;
+        }
+    }
+}
+```
+
+We can now get started on creating the `StateMachine` itself. First we need to create the `IExampleStateMachine` `interface`:
+
+```csharp
+// We must use the RootName.Core.States namespace to inherit from IStateMachine.
+using RootName.Core.States;
+
+// All StateMachines require an interface to be defined.
+//
+// The interface of the StateMachines resides in a subfolder of the same name within
+// the the "Assets/Runtime/States" folder.
+//
+// Defining an interface for our StateMachine allows for StateMachines to be generically typed,
+// which enables the bootstrapping of StateMachines at runtime. Interfaces also allow us
+// to restrict how these StateMachines are used by other classes.
+//
+// All public methods for the StateMachines must have their method signatures
+// defined in the interface itself.
+namespace RootName.Runtime.States.ExampleStates
+{
+    /// <summary>
+    /// We should always add a summary to the interface class definition.
+    /// This StateMachine sets states based on a panel's color, as an example.
+    /// </summary>
+    internal interface IExampleStateMachine : IStateMachine
+    {
+        /// <summary>
+        /// We should also always add summaries to interface methods.
+        /// As an example: Sets the red state.
+        /// </summary>
+        public void SetRedState();
+
+        /// <summary>
+        /// Sets the blue state.
+        /// </summary>
+        public void SetBlueState();
+
+        /// <summary>
+        /// Sets the green state.
+        /// </summary>
+        public void SetGreenState();
+    }
+}
+```
+
+Any time we create a `StateMachine`, we also need a companion script component that we can place on a `GameObject`. This looks a little different than how `Services` did in our previous examples, because our `MonoBehaviour` inheritance is built into the `BaseStateMachine` class. This is done so that we can enforce specific methods to be used within any `StateMachine` class, and comply with a specific state change pattern. Keeping all this in mind, here is our example companion script component for our `ExampleStateMachine`:
+
+```csharp
+// - RootNameSpace.Core.Messages is needed in order to create a new StateChangedMessage.
+// - RootNameSpace.Core.States is needed in order to inherit from the BaseStateMachine class.
+using RootName.Core.Messages;
+using RootName.Core.States;
+
+// The namespace of the any scripts for a StateMachine should always match its file/folder location.
+namespace RootName.Runtime.States.ExampleStates
+{
+    // In general when writing the class definition for a StateMachine:
+    // - Mark the class as internal to restrict its visibility to the namespace it lives in.
+    // - Make the class sealed to prevent further inheritance.
+    // - Inherit from BaseStateMachine, which contains MonoBehaviour, so that we can add the
+    //   StateMachine to a GameObject as a component. This also enforces the use of specific abstract
+    //   methods that are required for a StateChanged Event to work properly.
+    // - Inherit from the companion interface, in this case IExampleService.
+    internal sealed class ExampleStateMachine : BaseStateMachine, IExampleStateMachine
+    {
+        // We must use the MonoBehaviour Lifecycle method, Awake(), and use it to set the initial state.
+        private void Awake()
+        {
+            // The use of this method is enforced by the BaseStateMachine class.
+            SetInitialState();
+        }
+
+        // We must implement all public methods defined in our IExampleService interface.
+        // We'll start with RedState(). Here we will set the state of our ExampleStateMachine to the RedState.
+        // All the logic for doing so is handled internally and privately by the BaseStateMachine class.
+        public void SetRedState()
+        {
+            // Inside the public method, we will call the SetState method from the BaseStateMachine class.
+            // Make sure to hand it an IFiniteState that belongs to ExampleState, or else you'll get an exception. :)
+            SetState(new ExampleFiniteState.RedState());
+        }
+
+        public void SetBlueState()
+        {
+            // We do the same for all other publicly available methods for our interface.
+            SetState(new ExampleFiniteState.BlueState());
+        }
+
+        public void SetGreenState()
+        {
+            SetState(new ExampleFiniteState.GreenState());
+        }
+
+        // The use of this method is enforced by the BaseStateMachine class. We must override it,
+        // and define the initial state of the StateMachine.
+        //
+        // We then call SetInitialState() in Awake() to ensure this gets set at Runtime.
+        protected override void SetInitialState()
+        {
+            currentState = new ExampleFiniteState.RedState();
+        }
+
+        // The use of this method is enforced by the BaseStateMachine class. We must override it in order to 
+        // return the specific StateChangedMessage that we created for this StateMachine.
+        // In this case, we will be returning the ExampleStateChangedMessage that we created earlier.
+        protected override IMessage CreateStateChangedMessage(IFiniteState prevState, IFiniteState nextState)
+        {
+            // We enforce that the constructor parameters for
+            // prevState and nextState must be types of ExampleFiniteState.
+            return new ExampleStateChangedMessage(
+                prevState as ExampleFiniteState,
+                nextState as ExampleFiniteState
+            );
+        }
+    }
+}
+```
+
 ## Message Events
 
 `Message Events` are a nice decoupled alternative to Unity/C# actions, events, and delagates. They allow for events to be communicated across the application by simply adding a listener for the `Message` in `OnEnable()` or `OnDisable()`, and only require that the script listening for the message use `RootName.Core` and the namespace that the `Messages` script lives in. 
