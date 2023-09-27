@@ -8,7 +8,7 @@ This document provides a quick-start guide for working within the standards and 
 
 Recommendations for the file/folder structure of a Unity project is documented below. Through the development cycle of the application, we may have small deviations from the structure that is outlined. If the need arises, this section will be updated to reflect any changes.
 
-```
+```text
 // All core architectural scripts are placed here
 Assets/Scripts/Core
 
@@ -271,6 +271,8 @@ namespace RootName.Runtime.Example
 When creating a new `Service`, we must first define an interface for the `Service` as shown below:
 
 ```csharp
+using RootName.Core.Services //Required for inheriting from IService
+
 // All Services require an interface to be defined.
 //
 // The interface of the Service resides in a subfolder of the same name within
@@ -286,8 +288,9 @@ namespace RootName.Runtime.Services.ExampleService
 {
     /// <summary>
     /// We should always add summaries to interface class definitions.
+	/// All Service interfaces must inherit from IService for generic typing
     /// </summary>
-    internal interface IExampleService
+    internal interface IExampleService : IService
     {
         /// <summary>
         /// We should also always add summaries to interface methods.
@@ -323,9 +326,8 @@ namespace RootName.Runtime.Services.ExampleService
     // - Mark the class as internal to restrict its visibility to the namespace it lives in.
     // - Make the class sealed to prevent further inheritance.
     // - Inherit from MonoBehaviour so that we can add the Service to a GameObject as a component.
-    // - Inherit from IService for generic typing during the ApplicationManager bootstrapping routine.
     // - Inherit from the companion interface, in this case IExampleService.
-    internal sealed class ExampleService : MonoBehaviour, IService, IExampleService
+    internal sealed class ExampleService : MonoBehaviour, IExampleService
     {
         // When defining fields for Services, we follow the same general rules.
         // In general, however, Services should only contain regular private fields
@@ -384,11 +386,11 @@ namespace RootName.Runtime.Services.ExampleService
 
 In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with entities, components, and systems within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS architecture tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, whil still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
 
-In the future, we will likely create a `internal sealed class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Stay tuned.
+In the future, we will likely create a `internal sealed class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Once that happens, this section will be updated with more specific guidance and coding standards for `EntityServices`.
 
 ## States
 
-Provided with the application architecture are core scripts for creating `States`, or hierarchical state machines (HSMs). These state machines require the implementation of specific pieces of the core architecture in order to enforce adherence to a specific state change pattern, ensuring that `State Change Events` always happen in a specific order in every single HSM. Let's step through an `ExampleStateMachine` to better illustrate this, lets start by defining an overall `IState` definition specific to our `ExampleStateMachine`:
+Provided with the application architecture are core scripts for creating `States`, or finite state machines (FSMs). These state machines require the implementation of specific pieces of the core architecture in order to enforce adherence to a specific state change pattern, ensuring that `State Change Events` always happen in a specific order in every single FSM. Let's step through an `ExampleStateMachine` to better illustrate this, lets start by defining an overall `IState` definition specific to our `ExampleStateMachine`:
 
 ```csharp
 // - System is needed to returning the typeof FiniteStates within our State definition.
@@ -399,15 +401,15 @@ Provided with the application architecture are core scripts for creating `States
 using System; 
 using RootName.Core.States; 
 
-// The namespace of the any scripts for a StateMachine should always match its file/folder location.
+// The namespace of the any scripts for a State Machine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
 {
     // All State definitions must inherit from the IState interface for type-safety.
-    // This prevents us from mixing up different States from other StateMachines.
+    // This prevents us from mixing up different States from other State Machines.
     internal class ExampleState : IState
     {
         // We must provide a method for returning the type of FiniteState that this State uses.
-        // This concludes the enforcement of type-safety for our StateMachine
+        // This concludes the enforcement of type-safety for our State Machine
         // within our enumless state definition.
         public Type GetFiniteStateType()
         {
@@ -428,23 +430,23 @@ Now that we have a parent type defined for our `IFiniteStates`, lets go on to de
 using System;
 using RootName.Core.States;
 
-// The namespace of the any scripts for a StateMachine should always match its file/folder location.
+// The namespace of the any scripts for a State Machine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
 {
     // All State definitions must inherit from the IState interface for type-safety.
-    // This prevents us from mixing up different States from other StateMachines.
+    // This prevents us from mixing up different States from other State Machines.
     internal abstract class ExampleFiniteState : IFiniteState
     {
 
         // We must provide a method for returning the type of State that this FiniteState belongs to.
-        // This concludes the enforcement of type-safety for our StateMachine
+        // This concludes the enforcement of type-safety for our State Machine
         // within our enumless state definition.
         public Type GetStateType()
         {
             return typeof(ExampleState);
         }
         
-        // Now we can define some FiniteStates for our StateMachine!
+        // Now we can define some FiniteStates for our State Machine!
         // To do this we create some empty classes that inherit from our abstract FiniteState class.
         // Sealing these classes prevents them from being inherited from, ending the inheritance chain.
         internal sealed class RedState : ExampleFiniteState
@@ -462,13 +464,13 @@ namespace RootName.Runtime.States.ExampleStates
 }
 ```
 
-Now we need to a create a `StateChangedMessage` that is specific to our `StateMachine`'s `IState` and `IFiniteState` types for overall type-safety. This will allow us to communicate the `State Changed Message Event` without the risk of mixing types between different `StateMachines`:
+Now we need to a create a `StateChangedMessage` that is specific to our `State Machine`'s `IState` and `IFiniteState` types for overall type-safety. This will allow us to communicate the `StateChangedMessage` Event without the risk of mixing types between different `State Machines`:
 
 ```csharp
 // We need to use the RootName.Core.States namespace to inherit from the StateChangedMessage<T> class.
 using RootName.Core.States;
 
-// The namespace of the any scripts for a StateMachine should always match its file/folder location.
+// The namespace of the any scripts for a State Machine should always match its file/folder location.
 // 
 // For our Message Events specifically, all Message Events must be placed in a script called Messages
 // that resides within the namespace where these Message Events are most relevant.
@@ -496,28 +498,28 @@ namespace RootName.Runtime.States.ExampleStates
 }
 ```
 
-We can now get started on creating the `StateMachine` itself. First we need to create the `IExampleStateMachine` `interface`:
+We can now get started on creating the `State Machine` itself. First we need to create the `IExampleStateMachine` `interface`:
 
 ```csharp
 // We must use the RootName.Core.States namespace to inherit from IStateMachine.
 using RootName.Core.States;
 
-// All StateMachines require an interface to be defined.
+// All State Machines require an interface to be defined.
 //
-// The interface of the StateMachines resides in a subfolder of the same name within
+// The interface of the State Machines resides in a subfolder of the same name within
 // the the "Assets/Runtime/States" folder.
 //
-// Defining an interface for our StateMachine allows for StateMachines to be generically typed,
-// which enables the bootstrapping of StateMachines at runtime. Interfaces also allow us
-// to restrict how these StateMachines are used by other classes.
+// Defining an interface for our State Machine allows for State Machines to be generically typed,
+// which enables the bootstrapping of State Machines at runtime. Interfaces also allow us
+// to restrict how these State Machines are used by other classes.
 //
-// All public methods for the StateMachines must have their method signatures
+// All public methods for the State Machines must have their method signatures
 // defined in the interface itself.
 namespace RootName.Runtime.States.ExampleStates
 {
     /// <summary>
     /// We should always add a summary to the interface class definition.
-    /// This StateMachine sets states based on a panel's color, as an example.
+    /// This State Machine sets states based on a panel's color, as an example.
     /// </summary>
     internal interface IExampleStateMachine : IStateMachine
     {
@@ -540,7 +542,7 @@ namespace RootName.Runtime.States.ExampleStates
 }
 ```
 
-Any time we create a `StateMachine`, we also need a companion script component that we can place on a `GameObject`. This looks a little different than how `Services` did in our previous examples, because our `MonoBehaviour` inheritance is built into the `BaseStateMachine` class. This is done so that we can enforce specific methods to be used within any `StateMachine` class, and comply with a specific state change pattern. Keeping all this in mind, here is our example companion script component for our `ExampleStateMachine`:
+Any time we create a `State Machine`, we also need a companion script component that we can place on a `GameObject`. This looks a little different than how `Services` did in our previous examples, because our `MonoBehaviour` inheritance is built into the `BaseStateMachine` class. This is done so that we can enforce specific methods to be used within any `State Machine` class, and comply with a specific state change pattern. Keeping all this in mind, here is our example companion script component for our `ExampleStateMachine`:
 
 ```csharp
 // - RootNameSpace.Core.Messages is needed in order to create a new StateChangedMessage.
@@ -550,7 +552,7 @@ using RootName.Core.Messages;
 using RootName.Core.States;
 using RootName.Runtime.States.ApplicationStates; // We can also reference other State Machines.
 
-// The namespace of the any scripts for a StateMachine should always match its file/folder location.
+// The namespace of the any scripts for a State Machine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
 {
     // In general when writing the class definition for a State Machine:
@@ -570,7 +572,7 @@ namespace RootName.Runtime.States.ExampleStates
         }
 
         // We can use OnEnable and OnDisable to listen to Message Events published over the Message Bus.
-        // These can be from any other script in the application, including other StateMachines.
+        // These can be from any other script in the application, including other State Machines.
         // 
         // For housekeeping purposes, we will want to wrap any listeners we create in OnEnable() with a call to
         // AddListeners() a call to RemoveListeners().
@@ -606,7 +608,7 @@ namespace RootName.Runtime.States.ExampleStates
         }
 
         // The use of this method is enforced by the BaseStateMachine class. We must override it,
-        // and define the initial state of the StateMachine.
+        // and define the initial state of the State Machine.
         //
         // We then call SetInitialState() in Awake() to ensure this gets set at Runtime.
         protected override void SetInitialState()
@@ -615,7 +617,7 @@ namespace RootName.Runtime.States.ExampleStates
         }
 
         // The use of this method is enforced by the BaseStateMachine class. We must override it in order to 
-        // return the specific StateChangedMessage that we created for this StateMachine.
+        // return the specific StateChangedMessage that we created for this State Machine.
         // In this case, we will be returning the ExampleStateChangedMessage that we created earlier.
         protected override IMessage CreateStateChangedMessage(IFiniteState prevState, IFiniteState nextState)
         {
@@ -644,7 +646,7 @@ namespace RootName.Runtime.States.ExampleStates
             }
         }
 
-        // Add any listeners to the Message Bus here, including Message Events from other StateMachines.
+        // Add any listeners to the Message Bus here, including Message Events from other State Machines.
         // Make sure to provide a response method!
         private void AddListeners()
         {
