@@ -271,8 +271,6 @@ namespace RootName.Runtime.Example
 When creating a new `Service`, we must first define an interface for the `Service` as shown below:
 
 ```csharp
-using RootName.Core.Services; // Required for inheriting from IService.
-
 // All Services require an interface to be defined.
 //
 // The interface of the Service resides in a subfolder of the same name within
@@ -289,7 +287,7 @@ namespace RootName.Runtime.Services.ExampleService
     /// <summary>
     /// We should always add summaries to interface class definitions.
     /// </summary>
-    internal interface IExampleService : IService
+    internal interface IExampleService
     {
         /// <summary>
         /// We should also always add summaries to interface methods.
@@ -303,6 +301,7 @@ After defining the interface for the `Service`, we create a `MonoBehaviour` comp
 
 ```csharp
 using UnityEngine;
+using RootName.Core; // Required for inheriting from IService.
 using RootName.Runtime.Example;
 
 // The namespace of the Service should always match it's file/folder location.
@@ -326,7 +325,7 @@ namespace RootName.Runtime.Services.ExampleService
     // - Inherit from MonoBehaviour so that we can add the Service to a GameObject as a component.
     // - Inherit from IService for generic typing during the ApplicationManager bootstrapping routine.
     // - Inherit from the companion interface, in this case IExampleService.
-    internal sealed class ExampleService : MonoBehaviour, IExampleService
+    internal sealed class ExampleService : MonoBehaviour, IService, IExampleService
     {
         // When defining fields for Services, we follow the same general rules.
         // In general, however, Services should only contain regular private fields
@@ -385,7 +384,7 @@ namespace RootName.Runtime.Services.ExampleService
 
 In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with entities, components, and systems within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS architecture tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, whil still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
 
-In the future, we will likely create a `internal abstract class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Once that happens, this section will be updated to reflect these changes and provide specific coding standards for `EntityServices` that takes into account the differences between these and regular `Services`.
+In the future, we will likely create a `internal sealed class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Stay tuned.
 
 ## States
 
@@ -546,17 +545,19 @@ Any time we create a `StateMachine`, we also need a companion script component t
 ```csharp
 // - RootNameSpace.Core.Messages is needed in order to create a new StateChangedMessage.
 // - RootNameSpace.Core.States is needed in order to inherit from the BaseStateMachine class.
+using RootName.Core;
 using RootName.Core.Messages;
 using RootName.Core.States;
+using RootName.Runtime.States.ApplicationStates; // We can also reference other State Machines.
 
 // The namespace of the any scripts for a StateMachine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
 {
-    // In general when writing the class definition for a StateMachine:
+    // In general when writing the class definition for a State Machine:
     // - Mark the class as internal to restrict its visibility to the namespace it lives in.
     // - Make the class sealed to prevent further inheritance.
     // - Inherit from BaseStateMachine, which contains MonoBehaviour, so that we can add the
-    //   StateMachine to a GameObject as a component. This also enforces the use of specific abstract
+    //   State Machine to a GameObject as a component. This also enforces the use of specific abstract
     //   methods that are required for a StateChanged Event to work properly.
     // - Inherit from the companion interface, in this case IExampleService.
     internal sealed class ExampleStateMachine : BaseStateMachine, IExampleStateMachine
@@ -566,6 +567,21 @@ namespace RootName.Runtime.States.ExampleStates
         {
             // The use of this method is enforced by the BaseStateMachine class.
             SetInitialState();
+        }
+
+        // We can use OnEnable and OnDisable to listen to Message Events published over the Message Bus.
+        // These can be from any other script in the application, including other StateMachines.
+        // 
+        // For housekeeping purposes, we will want to wrap any listeners we create in OnEnable() with a call to
+        // AddListeners() a call to RemoveListeners().
+        private void OnEnable()
+        {
+            AddListeners();
+        }
+
+        private void OnDisable()
+        {
+            RemoveListeners();
         }
 
         // We must implement all public methods defined in our IExampleService interface.
@@ -609,6 +625,35 @@ namespace RootName.Runtime.States.ExampleStates
                 prevState as ExampleFiniteState,
                 nextState as ExampleFiniteState
             );
+        }
+
+        // Any response methods for Listeners must have the Type of Message Event as a method parameter.
+        // The return type is always void.
+        private void OnApplicationStateChangedMessage(ApplicationStateChangedMessage message)
+        {
+            // Because our states are class-based rather than enum-based, we must ask if the type of NextState
+            // is the type of the state we are looking for using an `is` comparison.
+            if (message.NextState is ApplicationFiniteState.LogoutState)
+            {
+                // If the NextState is the type of state we are looking for, we can call the SetRedState() method.
+                // What we have done here is a light example of how we can leverage our Hierarchical State Machines!
+                //
+                // This allows our State Machines to react to the state changes of other State Machines, creating a 
+                // more flexible hierarchy of states.
+                SetRedState();
+            }
+        }
+
+        // Add any listeners to the Message Bus here, including Message Events from other StateMachines.
+        // Make sure to provide a response method!
+        private void AddListeners()
+        {
+            ApplicationManager.AddListener<ApplicationStateChangedMessage>(OnApplicationStateChangedMessage);
+        }
+
+        private void RemoveListeners()
+        {
+            ApplicationManager.RemoveListener<ApplicationStateChangedMessage>(OnApplicationStateChangedMessage);
         }
     }
 }

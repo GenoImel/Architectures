@@ -1,16 +1,18 @@
 // - RootNameSpace.Core.Messages is needed in order to create a new StateChangedMessage.
 // - RootNameSpace.Core.States is needed in order to inherit from the BaseStateMachine class.
+using RootName.Core;
 using RootName.Core.Messages;
 using RootName.Core.States;
+using RootName.Runtime.States.ApplicationStates; // We can also reference other State Machines.
 
 // The namespace of the any scripts for a StateMachine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
 {
-    // In general when writing the class definition for a StateMachine:
+    // In general when writing the class definition for a State Machine:
     // - Mark the class as internal to restrict its visibility to the namespace it lives in.
     // - Make the class sealed to prevent further inheritance.
     // - Inherit from BaseStateMachine, which contains MonoBehaviour, so that we can add the
-    //   StateMachine to a GameObject as a component. This also enforces the use of specific abstract
+    //   State Machine to a GameObject as a component. This also enforces the use of specific abstract
     //   methods that are required for a StateChanged Event to work properly.
     // - Inherit from the companion interface, in this case IExampleService.
     internal sealed class ExampleStateMachine : BaseStateMachine, IExampleStateMachine
@@ -20,6 +22,21 @@ namespace RootName.Runtime.States.ExampleStates
         {
             // The use of this method is enforced by the BaseStateMachine class.
             SetInitialState();
+        }
+
+        // We can use OnEnable and OnDisable to listen to Message Events published over the Message Bus.
+        // These can be from any other script in the application, including other StateMachines.
+        // 
+        // For housekeeping purposes, we will want to wrap any listeners we create in OnEnable()
+        // and OnDisable() with a call to AddListeners() and RemoveListeners() respectively.
+        private void OnEnable()
+        {
+            AddListeners();
+        }
+
+        private void OnDisable()
+        {
+            RemoveListeners();
         }
 
         // We must implement all public methods defined in our IExampleService interface.
@@ -63,6 +80,35 @@ namespace RootName.Runtime.States.ExampleStates
                 prevState as ExampleFiniteState,
                 nextState as ExampleFiniteState
             );
+        }
+
+        // Any response methods for Listeners must have the Type of Message Event as a method parameter.
+        // The return type is always void.
+        private void OnApplicationStateChangedMessage(ApplicationStateChangedMessage message)
+        {
+            // Because our states are class-based rather than enum-based, we must ask if the type of NextState
+            // is the type of the state we are looking for using an `is` comparison.
+            if (message.NextState is ApplicationFiniteState.LogoutState)
+            {
+                // If the NextState is the type of state we are looking for, we can call the SetRedState() method.
+                // What we have done here is a light example of how we can leverage our Hierarchical State Machines!
+                //
+                // This allows our State Machines to react to the state changes of other State Machines, creating a 
+                // more flexible hierarchy of states.
+                SetRedState();
+            }
+        }
+
+        // Add any listeners to the Message Bus here, including Message Events from other StateMachines.
+        // Make sure to provide a response method!
+        private void AddListeners()
+        {
+            ApplicationManager.AddListener<ApplicationStateChangedMessage>(OnApplicationStateChangedMessage);
+        }
+
+        private void RemoveListeners()
+        {
+            ApplicationManager.RemoveListener<ApplicationStateChangedMessage>(OnApplicationStateChangedMessage);
         }
     }
 }
