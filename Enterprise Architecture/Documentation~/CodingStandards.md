@@ -1,8 +1,8 @@
 # Coding Standards
 
-In general, the coding style should follow the C# Coding Conventions as defined by [Microsoft](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions). These coding standards should make our lives easier by ensuring the overall readability and maintainability of the code. Note that we also follow the SOLID programming principles and try to adhere to the Gang of Four design patterns whenever possible to enable flexibility and scalability of the codebase as it grows.
+This document provides a quick-start guide for working within the standards and the core architecture for the application. Templates with heavy commentary are provided to empower developers to begin working with the codebase with short suspense. Templates with heavy commentary are provided to empower developers to begin woprking with the codebase with short suspense. The `CodingStandards.md` document does not, however, describe the application on a deep architectural level. For more information concerning the architectural structure of the codebase, please see `CoreArchitecture.md`.
 
-This document provides a quick-start guide for working within the standards and the core architecture for the application. Templates with heavy commentary are provided to empower developers to begin working with the codebase with short suspense. The Coding Standards document does not, however, describe the application on a deep architectural level. For more information concerning the architectural structure of the codebase, please see `CoreArchitecture.md`.
+In general, the coding style should follow the C# Coding Conventions as defined by [Microsoft](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions). These coding standards should make our lives easier by ensuring the overall readability and maintainability of the code. Note that we also follow the SOLID programming principles and try to adhere to the Gang of Four design patterns whenever possible to enable flexibility and scalability of the codebase as it grows. See these resources([SOLID Part 1](https://www.youtube.com/watch?v=QDldZWvNK_E&t=173s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D), [SOLID Part 2](https://www.youtube.com/watch?v=Fs8jy7DHDyc&t=1s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D), [SOLID Unity - Unity 2017](https://www.youtube.com/watch?v=eIf3-aDTOOA&t=14s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D)) for more information on the SOLID programming principles, and visit [Refactoring Guru](https://refactoring.guru/) for a quick overview on the Gang of Four design patterns, along with general philosophies and techniques for writing clean, maintainable, and scalable code.
 
 ## File Structure
 
@@ -12,8 +12,14 @@ Recommendations for the file/folder structure of a Unity project is documented b
 // All core architectural scripts are placed here
 Assets/Scripts/Core
 
-// All Runtime application code resides here
+// All Runtime application code resides here, separated by categorical subfolders
 Assets/Scripts/Runtime
+
+// As ane xample, an individual Service, State Machine, or Controller
+// Would be segregated into subfolders within the following category folders:
+Assets/Scripts/Runtime/Controllers
+Assets/Scripts/Runtime/Services
+Assets/Scripts/Runtime/States
 
 // Editor scripts which can also reference Runtime scripts live here
 Assets/Scripts/Editor
@@ -28,10 +34,16 @@ Assets/Settings
 //Rendering settings go here, specifically
 Assets/Settings/Rendering
 
-// Resources folder holds all application prefabs
-// ApplicationManager.prefab resides at the root Prefabs folder
-// All other prefabs should be kept in appropriately named subfolders
-Assets/Resources/Prefabs
+// ApplicationManager.prefab resides at the root of the Resources Folder
+// Further subfolders within the Resources folder can be used to organize
+// any Scriptable Objects used in the application
+Assets/Resources
+
+// All prefabs are kept in the Assets/Prefabs folder, and organized within subfolders
+// which mirror how we organize the Runtime folder.
+Assets/Prefabs/Controllers
+Assets/Prefabs/Services
+Assets/Prefabs/States
 
 // Plugins folder should only contain third party code and assets
 Assets/Plugins
@@ -54,6 +66,8 @@ Assets/Shaders
 // UI sprites and images go here organized into subfolders
 Assets/Textures
 ```
+
+Project file and folder structure is organize such that we folow industry best practices, ensuring a clean and navigable codebase. Core scripts, runtime application code, and scriptable objects hjave been distinctly categorized, with third-party elments kept separate for clarity. Assets, whether animations, materials, scenes, or shaders, are systematiocally arrange, which maintains an organized an intuitive project environment. This structured approach aids in both development efficiency and ease of collaboration.
 
 ## General
 
@@ -264,6 +278,8 @@ namespace RootName.Runtime.Example
 }
 ```
 
+By following the above conventions, we can emphasize a structured approach to `MonoBehaviour` scripts in Unity, focusing on organization and readability. Through a clear hierarchy form namespace imports to method declarations, along with practices like succinct code, comprehensive summaries, and effect event listener management, these guidelines promote a consistent and coherent coding style for streamline development and collaboration.
+
 ## Services
 
 `Services` are used to share data and code across `MonoBehaviour` controllers and other dynamic scripts without the need for tight coupling across the scene. All `Services` are bootstrapped into the core architecture at runtime by the `RootNameApplicationManager` prefab. For information on how to add a `Service` to the bootstrapping routine, please see the `CoreArchitecture.md` document.
@@ -288,7 +304,7 @@ namespace RootName.Runtime.Services.ExampleService
 {
     /// <summary>
     /// We should always add summaries to interface class definitions.
-	/// All Service interfaces must inherit from IService for generic typing
+    /// All Service interfaces must inherit from IService for generic typing
     /// </summary>
     internal interface IExampleService : IService
     {
@@ -300,14 +316,19 @@ namespace RootName.Runtime.Services.ExampleService
 }
 ```
 
-After defining the interface for the `Service`, we create a `MonoBehaviour` companion class in another script. This script will be added as a component of a `GameObject` by the same name of the Service:
+After defining the interface for the `Service`, we create a `MonoBehaviour` companion class in another script. This script will be added as a component of a `GameObject` by the same name of the `Service`:
 
 ```csharp
 using UnityEngine;
-using RootName.Core; // Required for inheriting from IService.
+using RootName.Core; // Required for any interactoin with ApplicationManager
+// If you need access to any Message Events defined in another Controller/Service/etc. namespace, make sure to add it.
+//
+// Don't abuse this accessibility, however. Using other namespaces to get direct injection of a Controller
+// or feature specific MonoBehaviour is not recommended within Services, EntityServices, States, or across other separate features.
+// Doing so can lead to ugly instances of tight coupling.
 using RootName.Runtime.Example;
 
-// The namespace of the Service should always match it's file/folder location.
+// The namespace of the Service should always match its file/folder location.
 namespace RootName.Runtime.Services.ExampleService
 {
     // Services allow us to share code and data across MonoBehaviour controllers, managers,
@@ -351,17 +372,14 @@ namespace RootName.Runtime.Services.ExampleService
         private void OnEnable()
         {
             // We can Add listeners for messages in our Services as well.
-            ApplicationManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
+	    // Make sure to wrap these in AddListeners().
+            AddListeners();
         }
 
         private void OnDisable()
         {
-            // If you add listeners for messages broadcast over the message bus
-            // remember to remove the same listeners in OnDisable().
-            //
-            // Also, if find yourself adding and removing many listeners, wrap these in
-            // methods called AddListeners() and RemoveListeners() to keep the script organized.
-            ApplicationManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
+	    // Make sure to use RemoveListeners() in OnDisable()!
+	    RemoveListeners();
         }
 
         // Summary is inherited from IExampleService.
@@ -379,12 +397,31 @@ namespace RootName.Runtime.Services.ExampleService
             var isEnabled = false;
             ApplicationManager.Publish(new OtherExampleMessage(isEnabled));
         }
+
+	// Make sure to wrap any listeners in AddListeners()/RemoveListeners()
+	// This keeps our scripts nice and organized.
+        private void AddListeners()
+        {
+            ApplicationManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
+        }
+
+        private void RemoveListeners()
+        {
+            // If you add listeners for messages broadcast over the message bus
+            // remember to remove the same listeners in OnDisable().
+            //
+            // Also, if find yourself adding and removing many listeners, wrap these in
+            // methods called AddListeners() and RemoveListeners() to keep the script organized.
+            ApplicationManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
+        }
     }
 ```
 
+In short, `Services` are essential components that facilitate the sharding of code and data across `MonBehaviour` `Controllers` and other dynamic scripts, promoting decoupled interactions between individual features. These are bootstrapped into the application at runtime by the `RootNameApplicationManagerPrefab`, and their creation involves defining specific `interfaces` and companion `MonoBehaviour` classes, ensuring modulatiry and minimizing direct dependencies in the application's architecture.
+
 ## EntityServices
 
-In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with entities, components, and systems within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS architecture tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, whil still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
+In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with entities, components, and systems within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS architecture tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, while still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
 
 In the future, we will likely create a `internal sealed class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Once that happens, this section will be updated with more specific guidance and coding standards for `EntityServices`.
 
@@ -397,7 +434,9 @@ Provided with the application architecture are core scripts for creating `States
 //
 // - RootName.Core.States is required for inheriting from the IState interface.
 //   This allows us to generically type our different States, enforcing type-safety
-//   and allowing us to define State definitions with FiniteStates without enums.
+//   and allowing us to define State definitions with FiniteStates.
+//
+// In short, we are creatine class-based states, rather than using enums.
 using System; 
 using RootName.Core.States; 
 
@@ -409,8 +448,7 @@ namespace RootName.Runtime.States.ExampleStates
     internal class ExampleState : IState
     {
         // We must provide a method for returning the type of FiniteState that this State uses.
-        // This concludes the enforcement of type-safety for our State Machine
-        // within our enumless state definition.
+        // This enforces type-safety for our class-based States.
         public Type GetFiniteStateType()
         {
             return typeof(ExampleFiniteState);
