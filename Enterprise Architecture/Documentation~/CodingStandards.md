@@ -1,8 +1,8 @@
 # Coding Standards
 
-In general, the coding style should follow the C# Coding Conventions as defined by [Microsoft](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions). These coding standards should make our lives easier by ensuring the overall readability and maintainability of the code. Note that we also follow the SOLID programming principles and try to adhere to the Gang of Four design patterns whenever possible to enable flexibility and scalability of the codebase as it grows.
+This document provides a quick-start guide for working within the standards and the core architecture for the application. Templates with heavy commentary are provided to empower developers to begin woprking with the codebase with short suspense. The `CodingStandards.md` document does not, however, describe the application on a deep architectural level. For more information concerning the architectural structure of the codebase, please see `CoreArchitecture.md`.
 
-This document provides a quick-start guide for working within the standards and the core architecture for the application. Templates with heavy commentary are provided to empower developers to begin working with the codebase with short suspense. The Coding Standards document does not, however, describe the application on a deep architectural level. For more information concerning the architectural structure of the codebase, please see `CoreArchitecture.md`.
+In general, the coding style should follow the C# Coding Conventions as defined by [Microsoft](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions). These coding standards should make our lives easier by ensuring the overall readability and maintainability of the code. Note that we also follow the SOLID programming principles and try to adhere to the Gang of Four design patterns whenever possible to enable flexibility and scalability of the codebase as it grows. See these resources ([SOLID Part 1](https://www.youtube.com/watch?v=QDldZWvNK_E&t=173s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D), [SOLID Part 2](https://www.youtube.com/watch?v=Fs8jy7DHDyc&t=1s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D), [SOLID Unity - Unity 2017](https://www.youtube.com/watch?v=eIf3-aDTOOA&t=14s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D)) for more information on the SOLID programming principles, and visit [Refactoring Guru](https://refactoring.guru/) for a quick overview on the Gang of Four design patterns, along with general philosophies and techniques for writing clean, maintainable, and scalable code.
 
 ## File Structure
 
@@ -12,8 +12,15 @@ Recommendations for the file/folder structure of a Unity project is documented b
 // All core architectural scripts are placed here
 Assets/Scripts/Core
 
-// All Runtime application code resides here
+// All Runtime application code resides here, separated by categorical subfolders
 Assets/Scripts/Runtime
+
+// As an example, an individual Service, State Machine, or Controller
+// Would be segregated into subfolders within the following category folders:
+Assets/Scripts/Runtime/Controllers
+Assets/Scripts/Runtime/Services
+Assets/Scripts/Runtime/EntityServices
+Assets/Scripts/Runtime/States
 
 // Editor scripts which can also reference Runtime scripts live here
 Assets/Scripts/Editor
@@ -28,10 +35,17 @@ Assets/Settings
 //Rendering settings go here, specifically
 Assets/Settings/Rendering
 
-// Resources folder holds all application prefabs
-// ApplicationManager.prefab resides at the root Prefabs folder
-// All other prefabs should be kept in appropriately named subfolders
-Assets/Resources/Prefabs
+// ApplicationManager.prefab resides at the root of the Resources Folder
+// Further subfolders within the Resources folder can be used to organize
+// any Scriptable Objects used in the application
+Assets/Resources
+
+// All prefabs are kept in the Assets/Prefabs folder, and organized within subfolders
+// which mirror how we organize the Runtime folder.
+Assets/Prefabs/Controllers
+Assets/Prefabs/Services
+Assets/Prefabs/EntityServices
+Assets/Prefabs/States
 
 // Plugins folder should only contain third party code and assets
 Assets/Plugins
@@ -53,11 +67,16 @@ Assets/Shaders
 
 // UI sprites and images go here organized into subfolders
 Assets/Textures
+
+// If any audio files are needed, these will go here and be organized into subfolders
+Assets/Sound
 ```
+
+Project file and folder structure is organize such that we follow industry best practices, ensuring a clean and navigable codebase. Core scripts, runtime application code, and scriptable objects have been distinctly categorized, with third-party elments kept separate for clarity. Assets, whether animations, materials, scenes, or shaders, are systematically arranged, which maintains an organized an intuitive project environment. This structured approach aids in both development efficiency and ease of collaboration.
 
 ## General
 
-A general script is one that is used for controllers and other dynamic, feature restricted scripts. These can either be preloaded by the `ApplicationManager` in cases where they are needed across different scenes, or they may be placed into a specific scene if their functionality is limited in architectural scope. The general format for a `MonoBehaviour` controller or other dynamic script is as follows:
+A general script is one that is used for controllers and other dynamic, feature restricted scripts. These can either be preloaded by the `ApplicationManager` in cases where they are needed across different scenes, or they may be placed into a specific scene if their functionality is limited in architectural scope. The general format for a `MonoBehaviour` Controller or other dynamic script is as follows:
 
 ```csharp
 // We should try to keep our namespaces organized for readability and maintainability.
@@ -155,11 +174,11 @@ namespace RootName.Runtime.Example
         
         // OnEnable and OnDisable methods are used for event subscription. When adding listeners in OnEnable(),
         // we should always remember to remove them in OnDisable().
-        // Remember to do this will reduce computation on disabled components.
+        // Remembering to do this will reduce computation on disabled components.
         //
         // If you find that you are adding/removing many listeners, we will wrap these in
         // methods called AddListeners() and RemoveListeners(). This will keep the script organized.
-        // Let's show that example here...
+        // Let's show an example here...
         private void OnEnable()
         {
             // Call AddListeners() in OnEnable().
@@ -223,7 +242,7 @@ namespace RootName.Runtime.Example
         }
 
         // When defining a private response method for a message received over the message bus
-        // We must include the message in the method's signature.
+        // we must include the message in the method's signature.
         private void OnExampleMessageReceived(ExampleMessage message)
         {
             //do stuff with the ExampleMessage.
@@ -264,6 +283,8 @@ namespace RootName.Runtime.Example
 }
 ```
 
+By following the above conventions, we can emphasize a structured approach to `MonoBehaviour` scripts in Unity, focusing on organization and readability. Through a clear hierarchy from namespace imports to method declarations, along with practices like succinct code, comprehensive summaries, and effective event listener management, these guidelines promote a consistent and coherent coding style for streamlined development and collaboration.
+
 ## Services
 
 `Services` are used to share data and code across `MonoBehaviour` controllers and other dynamic scripts without the need for tight coupling across the scene. All `Services` are bootstrapped into the core architecture at runtime by the `RootNameApplicationManager` prefab. For information on how to add a `Service` to the bootstrapping routine, please see the `CoreArchitecture.md` document.
@@ -271,7 +292,7 @@ namespace RootName.Runtime.Example
 When creating a new `Service`, we must first define an interface for the `Service` as shown below:
 
 ```csharp
-using RootName.Core.Services //Required for inheriting from IService
+using RootName.Core.Services // Required for inheriting from IService
 
 // All Services require an interface to be defined.
 //
@@ -288,7 +309,7 @@ namespace RootName.Runtime.Services.ExampleService
 {
     /// <summary>
     /// We should always add summaries to interface class definitions.
-	/// All Service interfaces must inherit from IService for generic typing
+    /// All Service interfaces must inherit from IService for generic typing.
     /// </summary>
     internal interface IExampleService : IService
     {
@@ -300,24 +321,26 @@ namespace RootName.Runtime.Services.ExampleService
 }
 ```
 
-After defining the interface for the `Service`, we create a `MonoBehaviour` companion class in another script. This script will be added as a component of a `GameObject` by the same name of the Service:
+After defining the interface for the `Service`, we create a `MonoBehaviour` companion class in another script. This script will be added as a component of a `GameObject` by the same name of the `Service`:
 
 ```csharp
 using UnityEngine;
-using RootName.Core; // Required for inheriting from IService.
+using RootName.Core; // Required for any interactoin with ApplicationManager
+// If you need access to any Message Events defined in another Controller/Service/etc. namespace, make sure to add it.
+//
+// Don't abuse this accessibility, however. Using other namespaces to get direct injection of a Controller
+// or feature specific MonoBehaviour is not recommended within Services, EntityServices, States, or across other separate features.
+// Doing so can lead to ugly instances of tight coupling.
 using RootName.Runtime.Example;
 
-// The namespace of the Service should always match it's file/folder location.
+// The namespace of the Service should always match its file/folder location.
 namespace RootName.Runtime.Services.ExampleService
 {
-    // Services allow us to share code and data across MonoBehaviour controllers, managers,
-    // and other dynamic scripts without tight coupling. By using the ApplicationManager singleton,
-    // we can perform dependency injection to get access to Services using ApplicationManager.GetService().
-    //
     // Services are a key part of our application for the following reasons:
     // - Services minimize the number of singletons in a application's architecture.
-    // - They enable code and data sharing.
-    // - Dependency injection minimizes tight-coupling across classes and GameObjects.
+    // - They enable code and data sharing across features.
+    // - Dependency injection using ApplicationManager.GetService() minimizes tight-coupling
+    //   across classes and GameObjects.
     //
     // Also note that when inheriting interfaces, we don't need to specify summaries. These summaries
     // are already inherited from the interface.
@@ -351,17 +374,14 @@ namespace RootName.Runtime.Services.ExampleService
         private void OnEnable()
         {
             // We can Add listeners for messages in our Services as well.
-            ApplicationManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
+	    // Make sure to wrap these in AddListeners().
+            AddListeners();
         }
 
         private void OnDisable()
         {
-            // If you add listeners for messages broadcast over the message bus
-            // remember to remove the same listeners in OnDisable().
-            //
-            // Also, if find yourself adding and removing many listeners, wrap these in
-            // methods called AddListeners() and RemoveListeners() to keep the script organized.
-            ApplicationManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
+	    // Make sure to use RemoveListeners() in OnDisable()!
+	    RemoveListeners();
         }
 
         // Summary is inherited from IExampleService.
@@ -379,14 +399,33 @@ namespace RootName.Runtime.Services.ExampleService
             var isEnabled = false;
             ApplicationManager.Publish(new OtherExampleMessage(isEnabled));
         }
+
+	// Make sure to wrap any listeners in AddListeners()/RemoveListeners()
+	// This keeps our scripts nice and organized.
+        private void AddListeners()
+        {
+            ApplicationManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
+        }
+
+        private void RemoveListeners()
+        {
+            // If you add listeners for messages broadcast over the message bus
+            // remember to remove the same listeners in OnDisable().
+            //
+            // Also, if find yourself adding and removing many listeners, wrap these in
+            // methods called AddListeners() and RemoveListeners() to keep the script organized.
+            ApplicationManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
+        }
     }
 ```
 
+In short, `Services` are essential components that facilitate the sharing of code and data across `MonBehaviour` `Controllers` and other dynamic scripts, promoting decoupled interactions between individual features. These are bootstrapped into the application at runtime by the `RootNameApplicationManagerPrefab`, and their creation involves defining specific `interfaces` and companion `MonoBehaviour` classes, ensuring modularity and minimizing direct dependencies in the application's architecture.
+
 ## EntityServices
 
-In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with entities, components, and systems within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS architecture tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, whil still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
+In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with `Entities`, `Components`, and `Systems` within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS styled code tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, while still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
 
-In the future, we will likely create a `internal sealed class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an oppurtunity to design an `EntityService` arises. Once that happens, this section will be updated with more specific guidance and coding standards for `EntityServices`.
+In the future, we will likely create a `internal abstract class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an opportunity to design an `EntityService` arises. Once that happens, this section will be updated with more specific guidance and coding standards for `EntityServices`.
 
 ## States
 
@@ -397,7 +436,9 @@ Provided with the application architecture are core scripts for creating `States
 //
 // - RootName.Core.States is required for inheriting from the IState interface.
 //   This allows us to generically type our different States, enforcing type-safety
-//   and allowing us to define State definitions with FiniteStates without enums.
+//   and allowing us to define State definitions with FiniteStates.
+//
+//   In short, we are creatine class-based states, rather than using enums.
 using System; 
 using RootName.Core.States; 
 
@@ -409,8 +450,7 @@ namespace RootName.Runtime.States.ExampleStates
     internal class ExampleState : IState
     {
         // We must provide a method for returning the type of FiniteState that this State uses.
-        // This concludes the enforcement of type-safety for our State Machine
-        // within our enumless state definition.
+        // This enforces type-safety for our class-based States.
         public Type GetFiniteStateType()
         {
             return typeof(ExampleFiniteState);
@@ -419,14 +459,14 @@ namespace RootName.Runtime.States.ExampleStates
 }
 ```
 
-Now that we have a parent type defined for our `IFiniteStates`, lets go on to define some enumless states for our `ExampleStateMachine`. To do this, create a separate script called `ExampleFiniteStates`:
+Now that we have a parent type defined for our `IFiniteStates`, lets go on to define some class-based finite states for our `ExampleStateMachine`. To do this, create a separate script called `ExampleFiniteStates`:
 
 ```csharp
 // - System is needed to returning the typeof State for an individual FiniteState.
 //
 // - RootName.Core.States is required for inheriting from the IFiniteState interface.
 //   This allows us to generically type our different IFiniteStates, enforcing type-safety
-//   and allowing us to define IFiniteState definitions without enums.
+//   and allows us to define IFiniteState definitions without enums.
 using System;
 using RootName.Core.States;
 
@@ -435,12 +475,12 @@ namespace RootName.Runtime.States.ExampleStates
 {
     // All State definitions must inherit from the IState interface for type-safety.
     // This prevents us from mixing up different States from other State Machines.
-    internal abstract class ExampleFiniteState : IFiniteState
+    internal abstract class ExampleFiniteStates : IFiniteState
     {
 
         // We must provide a method for returning the type of State that this FiniteState belongs to.
         // This concludes the enforcement of type-safety for our State Machine
-        // within our enumless state definition.
+        // within our class-based State definition.
         public Type GetStateType()
         {
             return typeof(ExampleState);
@@ -448,7 +488,7 @@ namespace RootName.Runtime.States.ExampleStates
         
         // Now we can define some FiniteStates for our State Machine!
         // To do this we create some empty classes that inherit from our abstract FiniteState class.
-        // Sealing these classes prevents them from being inherited from, ending the inheritance chain.
+        // Sealing these classes ends the inheritance chain.
         internal sealed class RedState : ExampleFiniteState
         {
         }
@@ -464,7 +504,7 @@ namespace RootName.Runtime.States.ExampleStates
 }
 ```
 
-Now we need to a create a `StateChangedMessage` that is specific to our `State Machine`'s `IState` and `IFiniteState` types for overall type-safety. This will allow us to communicate the `StateChangedMessage` Event without the risk of mixing types between different `State Machines`:
+Now we need to a create a `StateChangedMessage` that is specific to our `State Machine`'s `IState` and `IFiniteState` types for overall type-safety. This will allow us to communicate the `StateChangedMessage` `Event` without the risk of mixing types between different `State Machines`:
 
 ```csharp
 // We need to use the RootName.Core.States namespace to inherit from the StateChangedMessage<T> class.
@@ -474,6 +514,7 @@ using RootName.Core.States;
 // 
 // For our Message Events specifically, all Message Events must be placed in a script called Messages
 // that resides within the namespace where these Message Events are most relevant.
+// Our ExampleStateChangedMessage would be included in this individual Messages script.
 namespace RootName.Runtime.States.ExampleStates
 {
     // To create an ExampleStateChangedMessage, we must inherit from the StateChangedMessage<T> class,
@@ -484,7 +525,7 @@ namespace RootName.Runtime.States.ExampleStates
     internal sealed class ExampleStateChangedMessage : StateChangedMessage<ExampleFiniteState>
     {
         // As with all non-empty Message Events, we must provide a public constructor. For our StateChangedMessage<T>
-        // events specifically, we will want to provide parameters of the previous and next FiniteStates, and
+        // Events specifically, we will want to provide parameters of the previous and next FiniteStates, and
         // pass them to the base constructor.
         //
         // It is very important to provide the previous and next states in this specific order as method parameters.
@@ -542,7 +583,7 @@ namespace RootName.Runtime.States.ExampleStates
 }
 ```
 
-Any time we create a `State Machine`, we also need a companion script component that we can place on a `GameObject`. This looks a little different than how `Services` did in our previous examples, because our `MonoBehaviour` inheritance is built into the `BaseStateMachine` class. This is done so that we can enforce specific methods to be used within any `State Machine` class, and comply with a specific state change pattern. Keeping all this in mind, here is our example companion script component for our `ExampleStateMachine`:
+Any time we create a `State Machine`, we also need a `MonoBehaviour` companion script component that we can place on a `GameObject`. This looks a little different than how `Services` did in our previous examples, because our `MonoBehaviour` inheritance is built into the `BaseStateMachine` class. This is done so that we can enforce specific methods to be used within any `State Machine` class, and comply with a specific state change pattern. Keeping all this in mind, here is our example companion script component for our `ExampleStateMachine`:
 
 ```csharp
 // - RootNameSpace.Core.Messages is needed in order to create a new StateChangedMessage.
@@ -574,8 +615,8 @@ namespace RootName.Runtime.States.ExampleStates
         // We can use OnEnable and OnDisable to listen to Message Events published over the Message Bus.
         // These can be from any other script in the application, including other State Machines.
         // 
-        // For housekeeping purposes, we will want to wrap any listeners we create in OnEnable() with a call to
-        // AddListeners() a call to RemoveListeners().
+        // For housekeeping purposes, we will want to wrap any listeners we Add/Remove in 
+        // OnEnable()/OnDisable() with a call to AddListeners() and RemoveListeners() respectively.
         private void OnEnable()
         {
             AddListeners();
@@ -592,10 +633,11 @@ namespace RootName.Runtime.States.ExampleStates
         public void SetRedState()
         {
             // Inside the public method, we will call the SetState method from the BaseStateMachine class.
-            // Make sure to hand it an IFiniteState that belongs to ExampleState, or else you'll get an exception. :)
+            // Make sure to hand it an IFiniteState that belongs to ExampleState, or else you'll get an Exception.
             SetState(new ExampleFiniteState.RedState());
         }
 
+        // Remember that public method summaries are inherited from the interface.
         public void SetBlueState()
         {
             // We do the same for all other publicly available methods for our interface.
@@ -617,28 +659,28 @@ namespace RootName.Runtime.States.ExampleStates
         }
 
         // The use of this method is enforced by the BaseStateMachine class. We must override it in order to 
-        // return the specific StateChangedMessage that we created for this State Machine.
+        // return the specific StateChangedMessage that we created for our ExampleStateMachine.
         // In this case, we will be returning the ExampleStateChangedMessage that we created earlier.
         protected override IMessage CreateStateChangedMessage(IFiniteState prevState, IFiniteState nextState)
         {
-            // We enforce that the constructor parameters for
-            // prevState and nextState must be types of ExampleFiniteState.
+            // We enforce that the constructor parameters for prevState and nextState
+            // must be types of ExampleFiniteState.
             return new ExampleStateChangedMessage(
                 prevState as ExampleFiniteState,
                 nextState as ExampleFiniteState
             );
         }
 
-        // Any response methods for Listeners must have the Type of Message Event as a method parameter.
+        // Any response methods for Listeners must have the specific Message Event as a method parameter.
         // The return type is always void.
         private void OnApplicationStateChangedMessage(ApplicationStateChangedMessage message)
         {
             // Because our states are class-based rather than enum-based, we must ask if the type of NextState
-            // is the type of the state we are looking for using an `is` comparison.
+            // is the specific state we are looking for using an `is` comparison.
             if (message.NextState is ApplicationFiniteState.LogoutState)
             {
                 // If the NextState is the type of state we are looking for, we can call the SetRedState() method.
-                // What we have done here is a light example of how we can leverage our Hierarchical State Machines!
+                // What we have done here is a light example of how we can leverage Hierarchical State Machines!
                 //
                 // This allows our State Machines to react to the state changes of other State Machines, creating a 
                 // more flexible hierarchy of states.
@@ -661,21 +703,24 @@ namespace RootName.Runtime.States.ExampleStates
 }
 ```
 
+To summarize the above templates and commentary, `States` represent Finite State Machines (FSMs). They mandate specific implementation patterns to ensure that state transitions, known as `State Change Events`, occur in a designated sequence. Through the provided core scripts, the FSMs are designed to be class-based rather than reliant on enums, offering a more flexible and type-safe approach. This method of state management requires the use of `interfaces` and companion scripts such as `IState` and `IFiniteState`, to define and manage the FSMs. The sample provided, `ExampleStateMachine`, illustrates this by defining class-based states like `RedState`, `BlueState`, and `GreenState`. Additionally, `Message Events` like `StateChangedMessage` enable communication between different FSMs, allowing for a hierarchical structure of states. The use of `interfaces` and base classes, such as `BaseStateMachine`, ensure a consistent state change pattern across the application, whereas the use of `IStateMachine` facillitates runtime bootstrapping and the use of the service locator pattern through generic typing.
+
 ## Message Events
 
-`Message Events` are a nice decoupled alternative to Unity/C# actions, events, and delagates. They allow for events to be communicated across the application by simply adding a listener for the `Message` in `OnEnable()` or `OnDisable()`, and only require that the script listening for the message use `RootName.Core` and the namespace that the `Messages` script lives in. 
+`Message Events` are a nice decoupled alternative to Unity/C# `actions`, `events`, and `delagates`. They allow for events to be communicated across the application by simply adding a listener for the `Message Event` in `OnEnable()`, and only require that the script listening for the `Message Event` uses `RootName.Core` and the namespace that the `Messages` script lives in. 
 
-When defining messages in the application, we create a `Messages` script that lives in the folder with the scripts that are most associated with publishing these messages. Here is a simple example for creating new `Message Events`:
+When defining `Message Events` in the application, we create a `Messages` script that lives in the folder with the scripts that are most closely associated with publishing these messages. Here is a simple example for creating new `Message Events`:
 
 ```csharp
 // When creating new Messages, we must use the RootName.Core namespace.
 // 
-// This allows us to inherit from IMessage, which generically types the message
-// so that they can be added to the MessageManager in the core architecture.
+// This allows us to inherit from IMessage, which generically types the Message
+// Event so that they can be added to the MessageManager in the core architecture.
 using RootName.Core;
 
-// Messages scripts containing individual Message Events must live in a namespace that corresponds to their file/folder location.
-// These file/folder locations correspond to the feature most related to the Message Events.
+// Messages scripts containing individual Message Events must live in a namespace that 
+// corresponds to their file/folder location. These file/folder locations correspond
+// to the feature most related to publishing the Message Events.
 namespace RootName.Runtime.Example
 {
     // Message Events should be defined in separate files, and should be kept close to
@@ -698,7 +743,7 @@ namespace RootName.Runtime.Example
         // We allow scripts that receive these messages to get properties.
         // These properties can only be set inside a constructor.
         // This prevents other scripts from modifying the data after the 
-        // Message event has been constructed prior to publishing.
+        // Message event has been constructed prior to or after publishing.
         public bool IsEnabled { get; }
 
         // Message events that are not empty require a constructor in order
@@ -710,3 +755,9 @@ namespace RootName.Runtime.Example
     }
 }
 ```
+
+`Message Evets` present a structured and efficient way to facillitate communication across various parts of an application, by offering a level of decoupling that enhances code maintainability and readability. `Message Events` are best suited for cross application communication. Note that we should only use Unity/C# `actions`, `events`, and `delegates` within a feature restricted scope (i.e. within the prefab heirarchy of a specific feature/Controller), and all other communication across the application should rely on `Message Events`.
+
+# Conclusion
+
+Ahdering to this project's coding standards ensures a cohesive, efficient, and maintainable development environment. A meticulous approach to project organization makes our codebase navigable, which accelerates onboarding and collaborative productivity. Moreover, by leveraging core architectural components like `StateMachines`, `Services`, `EntityServices`, and `Message Events`, developers are empowered to craft scalable and modular features, enhancing both performance and flexibility. Abiding by these principles guarantees optimal code quality and robust application behaviour, benefitting both developers and end-users alike.
