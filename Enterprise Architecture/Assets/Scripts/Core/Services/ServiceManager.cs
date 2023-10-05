@@ -13,7 +13,7 @@ namespace RootName.Core.Services
         {
             if (service == null)
             {
-                throw new Exception($"{nameof(service)} cannot be null");
+                throw new NullReferenceException($"{nameof(service)} cannot be null");
             }
 
             var serviceType = typeof(TBindTo);
