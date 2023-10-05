@@ -1,5 +1,4 @@
 using RootName.Core;
-using RootName.Runtime.States.ApplicationStates;
 using UnityEngine;
 
 namespace RootName.Runtime
@@ -14,9 +13,6 @@ namespace RootName.Runtime
         [SerializeField] private Transform entityServicesParentTransform;
 
         [SerializeField] private Transform controllersParentTransform;
-        
-        [Header("States")]
-        [SerializeField] private ApplicationStateMachine applicationStateMachine;
 
         protected override string GetApplicationName()
         {
@@ -34,7 +30,6 @@ namespace RootName.Runtime
 
         protected override void InitializeApplicationStateMachines()
         {
-            AddStateMachine<ApplicationStateMachine, IApplicationStateMachine>(applicationStateMachine);
         }
         
         protected override void InitializeApplicationServices()
