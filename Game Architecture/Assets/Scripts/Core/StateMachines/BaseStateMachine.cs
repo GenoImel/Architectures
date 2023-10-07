@@ -2,7 +2,7 @@ using System;
 using RootName.Core.Messages;
 using UnityEngine;
 
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     internal abstract class BaseStateMachine : MonoBehaviour, IStateMachine
     {
@@ -35,7 +35,7 @@ namespace RootName.Core.States
             prevState = currentState;
             
             var stateChangedMessage = CreateStateChangedMessage(prevState, nextState);
-            ApplicationManager.Publish(stateChangedMessage);
+            GameManager.Publish(stateChangedMessage);
             
             currentState = nextState;
             

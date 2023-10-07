@@ -1,6 +1,6 @@
 using System;
 
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     /// <summary>
     /// For generic typing of specific state types on a per-State Machine basis.
