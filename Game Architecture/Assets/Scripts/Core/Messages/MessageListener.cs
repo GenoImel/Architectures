@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RootName.Core
+namespace RootName.Core.Messages
 {
     internal sealed class MessageListener<TMessage> : MessageListener where TMessage : IMessage
     {

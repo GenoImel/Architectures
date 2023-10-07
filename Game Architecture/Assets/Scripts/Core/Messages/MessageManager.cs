@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RootName.Core
+namespace RootName.Core.Messages
 {
     internal sealed class MessageManager
     {
