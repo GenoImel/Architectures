@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace RootName.Core
+namespace RootName.Core.MonoSystems
 {
     internal sealed class MonoSystemManager
     {
@@ -13,7 +13,7 @@ namespace RootName.Core
         {
             if (monoSystem == null)
             {
-                throw new Exception($"{nameof(monoSystem)} cannot be null");
+                throw new NullReferenceException($"{nameof(monoSystem)} cannot be null");
             }
 
             var monoSystemType = typeof(TBindTo);
