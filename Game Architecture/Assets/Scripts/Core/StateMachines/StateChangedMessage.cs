@@ -1,6 +1,6 @@
 using RootName.Core.Messages;
 
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     /// <summary>
     /// Base Message Event for State Changes.

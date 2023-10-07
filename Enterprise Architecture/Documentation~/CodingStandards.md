@@ -438,13 +438,13 @@ Provided with the application architecture are core scripts for creating `States
 ```csharp
 // - System is needed to returning the typeof FiniteStates within our State definition.
 //
-// - RootName.Core.States is required for inheriting from the IState interface.
+// - RootName.Core.StateMachines is required for inheriting from the IState interface.
 //   This allows us to generically type our different States, enforcing type-safety
 //   and allowing us to define State definitions with FiniteStates.
 //
 //   In short, we are creating class-based states, rather than using enums.
 using System; 
-using RootName.Core.States; 
+using RootName.Core.StateMachines; 
 
 // The namespace of the any scripts for a State Machine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
@@ -468,11 +468,11 @@ Now that we have a parent type defined for our `IFiniteStates`, lets go on to de
 ```csharp
 // - System is needed to returning the typeof State for an individual FiniteState.
 //
-// - RootName.Core.States is required for inheriting from the IFiniteState interface.
+// - RootName.Core.StateMachines is required for inheriting from the IFiniteState interface.
 //   This allows us to generically type our different IFiniteStates, enforcing type-safety
 //   and allows us to define IFiniteState definitions without enums.
 using System;
-using RootName.Core.States;
+using RootName.Core.StateMachines;
 
 // The namespace of the any scripts for a State Machine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
@@ -511,8 +511,8 @@ namespace RootName.Runtime.States.ExampleStates
 Now we need to a create a `StateChangedMessage` that is specific to our `State Machine`'s `IState` and `IFiniteState` types for overall type-safety. This will allow us to communicate the `StateChangedMessage` `Event` without the risk of mixing types between different `State Machines`:
 
 ```csharp
-// We need to use the RootName.Core.States namespace to inherit from the StateChangedMessage<T> class.
-using RootName.Core.States;
+// We need to use the RootName.Core.StateMachines namespace to inherit from the StateChangedMessage<T> class.
+using RootName.Core.StateMachines;
 
 // The namespace of the any scripts for a State Machine should always match its file/folder location.
 // 
@@ -546,8 +546,8 @@ namespace RootName.Runtime.States.ExampleStates
 We can now get started on creating the `State Machine` itself. First we need to create the `IExampleStateMachine` `interface`:
 
 ```csharp
-// We must use the RootName.Core.States namespace to inherit from IStateMachine.
-using RootName.Core.States;
+// We must use the RootName.Core.StateMachines namespace to inherit from IStateMachine.
+using RootName.Core.StateMachines;
 
 // All State Machines require an interface to be defined.
 //
@@ -591,10 +591,10 @@ Any time we create a `State Machine`, we also need a `MonoBehaviour` companion s
 
 ```csharp
 // - RootNameSpace.Core.Messages is needed in order to create a new StateChangedMessage.
-// - RootNameSpace.Core.States is needed in order to inherit from the BaseStateMachine class.
+// - RootNameSpace.Core.StateMachines is needed in order to inherit from the BaseStateMachine class.
 using RootName.Core;
 using RootName.Core.Messages;
-using RootName.Core.States;
+using RootName.Core.StateMachines;
 using RootName.Runtime.States.ApplicationStates; // We can also reference other State Machines.
 
 // The namespace of the any scripts for a State Machine should always match its file/folder location.

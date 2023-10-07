@@ -6,7 +6,7 @@ namespace RootName.Runtime
     internal sealed class RootNameApplicationManager : ApplicationManager
     {
         [Header("Management")]
-        [SerializeField] private Transform statesParentTransform;
+        [SerializeField] private Transform stateMachinesParentTransform;
 
         [SerializeField] private Transform servicesParentTransform;
 
@@ -44,7 +44,7 @@ namespace RootName.Runtime
 
         protected override void SetParentsActive()
         {
-            statesParentTransform.gameObject.SetActive(true);
+            stateMachinesParentTransform.gameObject.SetActive(true);
             servicesParentTransform.gameObject.SetActive(true);
             entityServicesParentTransform.gameObject.SetActive(true);
             controllersParentTransform.gameObject.SetActive(true);

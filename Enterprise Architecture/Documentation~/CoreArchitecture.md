@@ -45,7 +45,7 @@ using System;
 using RootName.Core.EntityServices;
 using RootName.Core.Messages;
 using RootName.Core.Services;
-using RootName.Core.States;
+using RootName.Core.StateMachines;
 using UnityEngine;
 
 // This script is intended to be the only singleton in the application.
@@ -542,7 +542,7 @@ The `IState` `interface` offers generic typing of specific `state` types, tailor
 ```csharp
 using System;
 
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     // The IState interface is used to generically type all
     // States, and is the beginning of our class-based State
@@ -566,7 +566,7 @@ In tandem with `IState`, the `IFiniteState` `interface` takes a more granular ap
 ```csharp
 using System;
 
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     // IFiniteStates allow us to define specific finite states within an IState
     // using class-based definitions for IFiniteStates rather than enums.
@@ -590,7 +590,7 @@ namespace RootName.Core.States
 ```csharp
 using RootName.Core.Messages;
 
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     // When defining a StateChangedMessage Event, we must inherit
     // from StateChangedMessage class specifically.
@@ -621,7 +621,7 @@ using System;
 using RootName.Core.Messages; // We use the Core.Messages namespace to create a StateChangedMessage.
 using UnityEngine;
 
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     // All StateMachines will inherit from our BaseStateMachine abstract class.
     internal abstract class BaseStateMachine : MonoBehaviour, IStateMachine
@@ -703,7 +703,7 @@ namespace RootName.Core.States
 Much like its sibling `interfaces`, the `IStateMachine` `interface` ensures generic typing for specific `StateMachines`. The use of generic typing accomplishes much the same goal as it does for our `Services` and `EntityServices` in that it allows us to leverage the service locator pattern to achieve clean dependency injection of a specific `StateMachine` without the need for tight coupling.
 
 ```csharp
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     // The IStateMachine interface is used to generically type all
     // StateMachines so that regardless of the overlying type
@@ -732,7 +732,7 @@ using System.Collections.Generic;
 // The StateMachineManager allows us to bootstrap StateMachines generically typed
 // via IStateMachine by using the AddStateMachine() method. It also allows us to
 // inject dependencies on StateMachines in other scripts by using GetStateMachine().
-namespace RootName.Core.States
+namespace RootName.Core.StateMachines
 {
     // This class is internal to the Core.Services namespace, and sealed to prevent 
     // extension through inheritance.

@@ -2,7 +2,7 @@ using System;
 using RootName.Core.EntityServices;
 using RootName.Core.Messages;
 using RootName.Core.Services;
-using RootName.Core.States;
+using RootName.Core.StateMachines;
 using UnityEngine;
 
 namespace RootName.Core

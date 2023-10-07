@@ -189,11 +189,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd84606557734f3c994a7cf75f8fb7aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  statesParentTransform: {fileID: 399079584411431313}
+  stateMachinesParentTransform: {fileID: 399079584411431313}
   servicesParentTransform: {fileID: 2888406022292699724}
   entityServicesParentTransform: {fileID: 7626650968414454864}
   controllersParentTransform: {fileID: 2559152992803976896}
-  applicationStateMachine: {fileID: 0}
 --- !u!1 &6086631538283355811
 GameObject:
   m_ObjectHideFlags: 0
@@ -204,7 +203,7 @@ GameObject:
   m_Component:
   - component: {fileID: 399079584411431313}
   m_Layer: 0
-  m_Name: States
+  m_Name: StateMachines
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
