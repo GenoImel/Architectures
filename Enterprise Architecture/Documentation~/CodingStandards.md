@@ -1,6 +1,6 @@
 # Coding Standards
 
-This document provides a quick-start guide for working within the standards and the core architecture for the application. Templates with heavy commentary are provided to empower developers to begin woprking with the codebase with short suspense. The `CodingStandards.md` document does not, however, describe the application on a deep architectural level. For more information concerning the architectural structure of the codebase, please see `CoreArchitecture.md`.
+This document provides a quick-start guide for working within the standards and the core architecture for the application. Templates with heavy commentary are provided to empower developers to begin working with the codebase with short suspense. The `CodingStandards.md` document does not, however, describe the application on a deep architectural level. For more information concerning the architectural structure of the codebase, please see `CoreArchitecture.md`.
 
 In general, the coding style should follow the C# Coding Conventions as defined by [Microsoft](https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions). These coding standards should make our lives easier by ensuring the overall readability and maintainability of the code. Note that we also follow the SOLID programming principles and try to adhere to the Gang of Four design patterns whenever possible to enable flexibility and scalability of the codebase as it grows. See these resources ([SOLID Part 1](https://www.youtube.com/watch?v=QDldZWvNK_E&t=173s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D), [SOLID Part 2](https://www.youtube.com/watch?v=Fs8jy7DHDyc&t=1s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D), [SOLID Unity - Unity 2017](https://www.youtube.com/watch?v=eIf3-aDTOOA&t=14s&pp=ygUWc29saWQgdW5pdHkgaW5mYWxsaWJsZQ%3D%3D)) for more information on the SOLID programming principles, and visit [Refactoring Guru](https://refactoring.guru/) for a quick overview on the Gang of Four design patterns, along with general philosophies and techniques for writing clean, maintainable, and scalable code.
 
@@ -10,6 +10,8 @@ Recommendations for the file/folder structure of a Unity project is documented b
 
 ```text
 // All core architectural scripts are placed here
+// The ApplicationManager resides at the root of Core,
+// while individual architectural modules are organized into subfolders.
 Assets/Scripts/Core
 
 // All Runtime application code resides here, separated by categorical subfolders
@@ -72,7 +74,7 @@ Assets/Textures
 Assets/Sound
 ```
 
-Project file and folder structure is organize such that we follow industry best practices, ensuring a clean and navigable codebase. Core scripts, runtime application code, and scriptable objects have been distinctly categorized, with third-party elments kept separate for clarity. Assets, whether animations, materials, scenes, or shaders, are systematically arranged, which maintains an organized an intuitive project environment. This structured approach aids in both development efficiency and ease of collaboration.
+Project file and folder structure is organize such that we follow industry best practices, ensuring a clean and navigable codebase. Core scripts, runtime application code, and scriptable objects have been distinctly categorized, with third-party elements kept separate for clarity. Assets, whether animations, materials, scenes, or shaders, are systematically arranged, which maintains an organized an intuitive project environment. This structured approach aids in both development efficiency and ease of collaboration.
 
 ## General
 
@@ -325,7 +327,7 @@ After defining the interface for the `Service`, we create a `MonoBehaviour` comp
 
 ```csharp
 using UnityEngine;
-using RootName.Core; // Required for any interactoin with ApplicationManager
+using RootName.Core; // Required for any interaction with ApplicationManager
 // If you need access to any Message Events defined in another Controller/Service/etc. namespace, make sure to add it.
 //
 // Don't abuse this accessibility, however. Using other namespaces to get direct injection of a Controller
@@ -374,14 +376,14 @@ namespace RootName.Runtime.Services.ExampleService
         private void OnEnable()
         {
             // We can Add listeners for messages in our Services as well.
-	    // Make sure to wrap these in AddListeners().
+        // Make sure to wrap these in AddListeners().
             AddListeners();
         }
 
         private void OnDisable()
         {
-	    // Make sure to use RemoveListeners() in OnDisable()!
-	    RemoveListeners();
+        // Make sure to use RemoveListeners() in OnDisable()!
+        RemoveListeners();
         }
 
         // Summary is inherited from IExampleService.
@@ -400,8 +402,8 @@ namespace RootName.Runtime.Services.ExampleService
             ApplicationManager.Publish(new OtherExampleMessage(isEnabled));
         }
 
-	// Make sure to wrap any listeners in AddListeners()/RemoveListeners()
-	// This keeps our scripts nice and organized.
+    // Make sure to wrap any listeners in AddListeners()/RemoveListeners()
+    // This keeps our scripts nice and organized.
         private void AddListeners()
         {
             ApplicationManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
@@ -423,7 +425,9 @@ In short, `Services` are essential components that facilitate the sharing of cod
 
 ## EntityServices
 
-In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with `Entities`, `Components`, and `Systems` within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS styled code tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oreinted first and foremost, while still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
+**Note: Remove this section for any projects that do not use ECS.**
+
+In the hybrid core architecture, `EntityServices` are intended to provide a clean interface for interacting with `Entities`, `Components`, and `Systems` within an ECS oriented architecture. This keeps much of the architectural headache when dealing with ECS styled code tucked away into a nice, neat corner and allows our application to be `MonoBehaviour` oriented first and foremost, while still allowing us to take advantage of the benefits of ECS. In general, however, `EntityServices` allow for the same benefits that normal `Services` do in that they enable code and data sharing across the application without the need for tight coupling. For now, the general format for creating an `EntityService` is exactly the same as we would for a regular `Service`.
 
 In the future, we will likely create a `internal abstract class` that inherits from `MonoBehaviour`, and allows us to enforce implementation of specific methods that are unique to interacting with ECS portions of the architecture. As such, this section is TBD until an opportunity to design an `EntityService` arises. Once that happens, this section will be updated with more specific guidance and coding standards for `EntityServices`.
 
@@ -438,7 +442,7 @@ Provided with the application architecture are core scripts for creating `States
 //   This allows us to generically type our different States, enforcing type-safety
 //   and allowing us to define State definitions with FiniteStates.
 //
-//   In short, we are creatine class-based states, rather than using enums.
+//   In short, we are creating class-based states, rather than using enums.
 using System; 
 using RootName.Core.States; 
 
@@ -703,11 +707,11 @@ namespace RootName.Runtime.States.ExampleStates
 }
 ```
 
-To summarize the above templates and commentary, `States` represent Finite State Machines (FSMs). They mandate specific implementation patterns to ensure that state transitions, known as `State Change Events`, occur in a designated sequence. Through the provided core scripts, the FSMs are designed to be class-based rather than reliant on enums, offering a more flexible and type-safe approach. This method of state management requires the use of `interfaces` and companion scripts such as `IState` and `IFiniteState`, to define and manage the FSMs. The sample provided, `ExampleStateMachine`, illustrates this by defining class-based states like `RedState`, `BlueState`, and `GreenState`. Additionally, `Message Events` like `StateChangedMessage` enable communication between different FSMs, allowing for a hierarchical structure of states. The use of `interfaces` and base classes, such as `BaseStateMachine`, ensure a consistent state change pattern across the application, whereas the use of `IStateMachine` facillitates runtime bootstrapping and the use of the service locator pattern through generic typing.
+To summarize the above templates and commentary, `States` represent Finite State Machines (FSMs). They mandate specific implementation patterns to ensure that state transitions, known as `State Change Events`, occur in a designated sequence. Through the provided core scripts, the FSMs are designed to be class-based rather than reliant on enums, offering a more flexible and type-safe approach. This method of state management requires the use of `interfaces` and companion scripts such as `IState` and `IFiniteState`, to define and manage the FSMs. The sample provided, `ExampleStateMachine`, illustrates this by defining class-based states like `RedState`, `BlueState`, and `GreenState`. Additionally, `Message Events` like `StateChangedMessage` enable communication between different FSMs, allowing for a hierarchical structure of states. The use of `interfaces` and base classes, such as `BaseStateMachine`, ensure a consistent state change pattern across the application, whereas the use of `IStateMachine` facilitates runtime bootstrapping and the use of the service locator pattern through generic typing.
 
 ## Message Events
 
-`Message Events` are a nice decoupled alternative to Unity/C# `actions`, `events`, and `delagates`. They allow for events to be communicated across the application by simply adding a listener for the `Message Event` in `OnEnable()`, and only require that the script listening for the `Message Event` uses `RootName.Core` and the namespace that the `Messages` script lives in. 
+`Message Events` are a nice decoupled alternative to Unity/C# `actions`, `events`, and `delegates`. They allow for events to be communicated across the application by simply adding a listener for the `Message Event` in `OnEnable()`, and only require that the script listening for the `Message Event` uses `RootName.Core` and the namespace that the `Messages` script lives in. 
 
 When defining `Message Events` in the application, we create a `Messages` script that lives in the folder with the scripts that are most closely associated with publishing these messages. Here is a simple example for creating new `Message Events`:
 
@@ -756,8 +760,8 @@ namespace RootName.Runtime.Example
 }
 ```
 
-`Message Evets` present a structured and efficient way to facillitate communication across various parts of an application, by offering a level of decoupling that enhances code maintainability and readability. `Message Events` are best suited for cross application communication. Note that we should only use Unity/C# `actions`, `events`, and `delegates` within a feature restricted scope (i.e. within the prefab heirarchy of a specific feature/Controller), and all other communication across the application should rely on `Message Events`.
+`Message Events` present a structured and efficient way to facilitate communication across various parts of an application, by offering a level of decoupling that enhances code maintainability and readability. `Message Events` are best suited for cross application communication. Note that we should only use Unity/C# `actions`, `events`, and `delegates` within a feature restricted scope (i.e. within the prefab hierarchy of a specific feature/Controller), and all other communication across the application should rely on `Message Events`.
 
 # Conclusion
 
-Ahdering to this project's coding standards ensures a cohesive, efficient, and maintainable development environment. A meticulous approach to project organization makes our codebase navigable, which accelerates onboarding and collaborative productivity. Moreover, by leveraging core architectural components like `StateMachines`, `Services`, `EntityServices`, and `Message Events`, developers are empowered to craft scalable and modular features, enhancing both performance and flexibility. Abiding by these principles guarantees optimal code quality and robust application behaviour, benefitting both developers and end-users alike.
+Adhering to this project's coding standards ensures a cohesive, efficient, and maintainable development environment. A meticulous approach to project organization makes our codebase navigable, which accelerates onboarding and collaborative productivity. Moreover, by leveraging core architectural components like `StateMachines`, `Services`, `EntityServices`, and `Message Events`, developers are empowered to craft scalable and modular features, enhancing both performance and flexibility. Abiding by these principles guarantees optimal code quality and robust application behaviour, benefiting both developers and end-users alike.
