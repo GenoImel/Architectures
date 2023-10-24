@@ -2,7 +2,7 @@
 
 The core architecture for the RootName application follows the philosophy of limiting the number of singletons in the codebase, and instead using a single `ApplicationManager` singleton to act as a central hub to orchestrate cross application communication while maintaining flexibility, scalability, maintainability- all wrapped in a simplistic API that is intuitive for developers of all skills levels to learn and apply. 
 
-The RootName application uses a hybridized core architecture with a foundational philosophy adheres to the following concepts:
+The RootName application uses a hybridized core architecture with a foundational philosophy that adheres to the following concepts:
 
 - **Embracing Unity's Native Framework:** Prioritizing a `MonoBehaviour`-centric design that respects Unity's `GameObject`-`Component` pattern.
 - **Modular Interfacing:** Implementing specialized `interfaces` like `Services` to foster seamless data and code interchangeability among decoupled application features. Further extension with `EntityServices` interfaces provides a streamlined bridge to interact cohesively with architectures rooted in Unity ECS.
@@ -649,7 +649,7 @@ namespace RootName.Core.StateMachines
 
             if (currentState == nextState)
             {
-                // If we are already in the next state already, we should log a warning.
+                // If we are already in the next state, we should log a warning.
                 // This may indicate that something in the application is not behaving as expected.
                 Debug.LogWarning($"State Machine is already in \"{nextState}\" state.");
                 return;

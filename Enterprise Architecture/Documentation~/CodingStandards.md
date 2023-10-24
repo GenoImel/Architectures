@@ -299,7 +299,7 @@ using RootName.Core.Services // Required for inheriting from IService
 // All Services require an interface to be defined.
 //
 // The interface of the Service resides in a subfolder of the same name within
-// the the "Assets/Runtime/Services" folder.
+// the "Assets/Runtime/Services" folder.
 //
 // Defining an interface for our Service allows for Services to be generically typed,
 // which enables the bootstrapping of Services at runtime. Interfaces also allow us
@@ -376,14 +376,14 @@ namespace RootName.Runtime.Services.ExampleService
         private void OnEnable()
         {
             // We can Add listeners for messages in our Services as well.
-        // Make sure to wrap these in AddListeners().
+            // Make sure to wrap these in AddListeners().
             AddListeners();
         }
 
         private void OnDisable()
         {
-        // Make sure to use RemoveListeners() in OnDisable()!
-        RemoveListeners();
+            // Make sure to use RemoveListeners() in OnDisable()!
+            RemoveListeners();
         }
 
         // Summary is inherited from IExampleService.
@@ -402,8 +402,8 @@ namespace RootName.Runtime.Services.ExampleService
             ApplicationManager.Publish(new OtherExampleMessage(isEnabled));
         }
 
-    // Make sure to wrap any listeners in AddListeners()/RemoveListeners()
-    // This keeps our scripts nice and organized.
+        // Make sure to wrap any listeners in AddListeners()/RemoveListeners()
+        // This keeps our scripts nice and organized.
         private void AddListeners()
         {
             ApplicationManager.AddListener<ExampleMessage>(OnExampleMessageReceived);
@@ -414,7 +414,7 @@ namespace RootName.Runtime.Services.ExampleService
             // If you add listeners for messages broadcast over the message bus
             // remember to remove the same listeners in OnDisable().
             //
-            // Also, if find yourself adding and removing many listeners, wrap these in
+            // Also, if you find yourself adding and removing many listeners, wrap these in
             // methods called AddListeners() and RemoveListeners() to keep the script organized.
             ApplicationManager.RemoveListener<ExampleMessage>(OnExampleMessageReceived);
         }
@@ -436,7 +436,7 @@ In the future, we will likely create a `internal abstract class` that inherits f
 Provided with the application architecture are core scripts for creating `States`, or finite state machines (FSMs). These state machines require the implementation of specific pieces of the core architecture in order to enforce adherence to a specific state change pattern, ensuring that `State Change Events` always happen in a specific order in every single FSM. Let's step through an `ExampleStateMachine` to better illustrate this, lets start by defining an overall `IState` definition specific to our `ExampleStateMachine`:
 
 ```csharp
-// - System is needed to returning the typeof FiniteStates within our State definition.
+// - System is needed for returning the typeof FiniteStates within our State definition.
 //
 // - RootName.Core.StateMachines is required for inheriting from the IState interface.
 //   This allows us to generically type our different States, enforcing type-safety
@@ -446,7 +446,7 @@ Provided with the application architecture are core scripts for creating `States
 using System; 
 using RootName.Core.StateMachines; 
 
-// The namespace of the any scripts for a State Machine should always match its file/folder location.
+// The namespace of any scripts for a State Machine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
 {
     // All State definitions must inherit from the IState interface for type-safety.
@@ -466,7 +466,7 @@ namespace RootName.Runtime.States.ExampleStates
 Now that we have a parent type defined for our `IFiniteStates`, lets go on to define some class-based finite states for our `ExampleStateMachine`. To do this, create a separate script called `ExampleFiniteStates`:
 
 ```csharp
-// - System is needed to returning the typeof State for an individual FiniteState.
+// - System is needed for returning the typeof State for an individual FiniteState.
 //
 // - RootName.Core.StateMachines is required for inheriting from the IFiniteState interface.
 //   This allows us to generically type our different IFiniteStates, enforcing type-safety
@@ -474,10 +474,10 @@ Now that we have a parent type defined for our `IFiniteStates`, lets go on to de
 using System;
 using RootName.Core.StateMachines;
 
-// The namespace of the any scripts for a State Machine should always match its file/folder location.
+// The namespace of any scripts for a State Machine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
 {
-    // All State definitions must inherit from the IState interface for type-safety.
+    // All State definitions must inherit from the IFiniteState interface for type-safety.
     // This prevents us from mixing up different States from other State Machines.
     internal abstract class ExampleFiniteStates : IFiniteState
     {
@@ -514,7 +514,7 @@ Now we need to a create a `StateChangedMessage` that is specific to our `State M
 // We need to use the RootName.Core.StateMachines namespace to inherit from the StateChangedMessage<T> class.
 using RootName.Core.StateMachines;
 
-// The namespace of the any scripts for a State Machine should always match its file/folder location.
+// The namespace of any scripts for a State Machine should always match its file/folder location.
 // 
 // For our Message Events specifically, all Message Events must be placed in a script called Messages
 // that resides within the namespace where these Message Events are most relevant.
@@ -552,7 +552,7 @@ using RootName.Core.StateMachines;
 // All State Machines require an interface to be defined.
 //
 // The interface of the State Machines resides in a subfolder of the same name within
-// the the "Assets/Runtime/States" folder.
+// the "Assets/Runtime/States" folder.
 //
 // Defining an interface for our State Machine allows for State Machines to be generically typed,
 // which enables the bootstrapping of State Machines at runtime. Interfaces also allow us
@@ -597,7 +597,7 @@ using RootName.Core.Messages;
 using RootName.Core.StateMachines;
 using RootName.Runtime.States.ApplicationStates; // We can also reference other State Machines.
 
-// The namespace of the any scripts for a State Machine should always match its file/folder location.
+// The namespace of any scripts for a State Machine should always match its file/folder location.
 namespace RootName.Runtime.States.ExampleStates
 {
     // In general when writing the class definition for a State Machine:
@@ -606,7 +606,7 @@ namespace RootName.Runtime.States.ExampleStates
     // - Inherit from BaseStateMachine, which contains MonoBehaviour, so that we can add the
     //   State Machine to a GameObject as a component. This also enforces the use of specific abstract
     //   methods that are required for a StateChanged Event to work properly.
-    // - Inherit from the companion interface, in this case IExampleService.
+    // - Inherit from the companion interface, in this case IExampleStateMachine.
     internal sealed class ExampleStateMachine : BaseStateMachine, IExampleStateMachine
     {
         // We must use the MonoBehaviour Lifecycle method, Awake(), and use it to set the initial state.
@@ -631,7 +631,7 @@ namespace RootName.Runtime.States.ExampleStates
             RemoveListeners();
         }
 
-        // We must implement all public methods defined in our IExampleService interface.
+        // We must implement all public methods defined in our IExampleStateMachine interface.
         // We'll start with RedState(). Here we will set the state of our ExampleStateMachine to the RedState.
         // All the logic for doing so is handled internally and privately by the BaseStateMachine class.
         public void SetRedState()
