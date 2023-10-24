@@ -2,12 +2,16 @@ using System;
 using RootName.Core.Messages;
 using UnityEngine;
 
+// ReSharper disable InconsistentNaming
+
 namespace RootName.Core.StateMachines
 {
     internal abstract class BaseStateMachine : MonoBehaviour, IStateMachine
     {
         protected IFiniteState currentState;
         protected IFiniteState prevState;
+        
+        public IFiniteState CurrentState => currentState;
 
         /// <summary>
         /// Sets the next state of the State Machine and publishes a State Changed Message.
